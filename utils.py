@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 def multiple_instcheck(vars: tuple, checks: tuple | None, manual_check: list = None):
     """Function to simplicity the ``isinstance()`` checks.
     This function allow to check if n elements are instance of a type.
@@ -26,6 +28,7 @@ def multiple_instcheck(vars: tuple, checks: tuple | None, manual_check: list = N
         return all(isinstance(e, checks) for e in vars)
 
 
+@lru_cache()
 def multiple_replace(rawstr: str, reml: tuple[tuple], count: int = -1):
     """Replacement optimized function."""
     assert isinstance(rawstr, str), "'rawstr' parameter must be the string representation where the characters will be replaced"

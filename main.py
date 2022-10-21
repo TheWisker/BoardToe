@@ -17,24 +17,28 @@ class BoardGame:
         if not multiple_instcheck((_rows, _columns), int):
             raise TypeError("Rows and columns must be a numerical parameters")
         
-        elif _rows != _columns or _rows * _columns > 64:   #8x8 = 64 -> Max board size
-            raise ValueError("The number of rows and columns must be equals to make an equitative boardgame or must be under 8 (Max table size of 8x8)")
+        elif _rows != _columns or not 9 <= _rows * _columns <= 64:   #3x3 - 8x8 -> Min & max board range
+            raise ValueError("The number of rows and columns must be equals or the table size is minor than 3x3 or mayor than 8x8 (Max table size of 8x8)")
         
         elif not multiple_instcheck((player, player2), str):
             raise ValueError("Player attribute must be a string saying the name of the player")
         elif not multiple_instcheck((tokenplayer1, tokenplayer2), str) or tokenplayer1 == tokenplayer2:
             raise TypeError("Token player must be X or O and each player must define a different token")
 
-        self.rows = _rows
-        self.columns = _columns
+        self.rows           = _rows
+        self.columns        = _columns
 
-        self.player1 = self._make_player_cache(player, tokenplayer1)
-        self.player2 = self._make_player_cache(player2, tokenplayer2)
+        self.player1        = self._make_player_cache(player, tokenplayer1)
+        self.player2        = self._make_player_cache(player2, tokenplayer2)
         
-        self.board = self._make_board()
-        self.partycounter = 0
-        self._party_cache = {"board_size": (_rows, _columns), "players": (self.player1, self.player2), "party": []}
-        self._movtuple = namedtuple("Movement", ["token", "player", "position"]) #, "moviment_time"
+        self.board          = self._make_board()
+        self.partycounter   = 0
+        
+        self._movtuple      = namedtuple("Movement", ["token", "player", "position"]) #, "moviment_time"
+        self._ptycachetuple = namedtuple("PartyCache", ["dictmap"])
+        self._party_cache   = {"board_size": (_rows, _columns), "players": (self.player1, self.player2), "party": []} 
+        self.debuginfo      = self._ptycachetuple(self._party_cache)
+
 
 
     def _make_player_cache(self, player, token):
@@ -86,7 +90,7 @@ class BoardGame:
         """
         posx, posy = pos[0]-1, pos[1]-1
         
-        if not (0 <= posx <= self.columns) or not (0 <= posy <= self.rows):
+        if not 0 <= posx <= self.columns or not 0 <= posy <= self.rows:
             return False  
 
         if table[posx][posy] != "-":
@@ -98,6 +102,7 @@ class BoardGame:
         else:
             #? coloca la ficha
             table[posx][posy] = player["token"]
+            
             #? Guarda el movimiento del jugador en su cache.
             player["movements"].append(pos)
             self._party_cache["party"].append(self._movtuple(player["token"], player["name"], pos))
@@ -144,7 +149,7 @@ class BoardGame:
 
 # TESTS  
       
-test = BoardGame(3,3, "0", "X") 
+test = BoardGame(2,2, "0", "X") 
 
 movements = [
     (test.player2, (1, 1)),
@@ -160,7 +165,7 @@ test._pprint(test.board)
 test.checkWin()
 
 print(f"\n{Fore.LIGHTGREEN_EX}DEBUGGING INFO:{Fore.RESET}\n")
-print(f"Party cache: {test._party_cache}\n")
+print(f"Party cache: {test.debuginfo}\n")
 print(f"Player1 cache: {test.player1}\n")
 print(f"Player2 cache: {test.player2}\n")
 
