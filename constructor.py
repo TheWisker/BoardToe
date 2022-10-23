@@ -33,11 +33,14 @@ class BoardGame:
         self.board          = self._make_board()
         self.partycounter   = 0
         
-        self._movtuple      = namedtuple("Movement", ["token", "player_name", "position"]) #, "moviment_time"
+        self._movtuple      = namedtuple("Movement", ["token", "player_name", "position", "moviment_time"])
         self._ptycachetuple = namedtuple("PartyCache", ["dictmap"])
         self._party_cache   = self._make_party_cache()
         self.debuginfo      = self._ptycachetuple(self._party_cache)
 
+    @property
+    def playing(self):
+        return self._playing
 
     def _make_party_cache(self) -> dict[str,]:
         "Makes a party cache."
@@ -47,7 +50,8 @@ class BoardGame:
             "players": (self.player1, self.player2), 
             "party": {
                 "win": False,    #? Cuando un jugador gana, este atributo se convierte en diccionario 
-                "movements": []
+                "movements": [],
+                "total_time": 0
             }
         }
         return party_cache
@@ -62,6 +66,15 @@ class BoardGame:
             "timings": [],
         }
         return cache
+
+    def _clear_caches(self):
+        "Limpia la cache."
+        player1n, tknpl1 = self.player1["name"], self.player1["token"]
+        player2n, tknpl2 = self.player2["name"], self.player2["token"]
+        self.player1        = self._make_player_cache(player1n, tknpl1)
+        self.player2        = self._make_player_cache(player2n, tknpl2)
+        self._party_cache = self._make_party_cache()
+        return
 
     def _make_board(self) -> list:
         "Private method to make a empty board"
@@ -79,11 +92,11 @@ class BoardGame:
     def _pprint(self, table) -> None:
         "Prints the table in a pretty way (without colons and token-colored)"
         print("\n")     # white line to stylize
-        for column in table:
-            print(multiple_replace(f"\t{column}", 
+        for i, column in enumerate(table):
+            print(multiple_replace(f"\t{i+1} {column}", 
                     (
                         ("'", ""), 
-                        (",", " "), 
+                        (",", "  "), 
                         ("[", f"{Fore.LIGHTBLUE_EX}|{Fore.RESET} "),
                         ("]", f" {Fore.LIGHTBLUE_EX}|{Fore.RESET}"),
                         ("0", f"{Fore.LIGHTWHITE_EX}0{Fore.RESET}"), 
@@ -92,36 +105,57 @@ class BoardGame:
                 )
             )
 
+
     #! PUBLIC METHODS   ----------------------------------------------------------------
 
-    def turn(self):
+    def turn(self) -> tuple[int, int]:
         "Fuction to manage the turns"
-        ...
+        self.turn_time = datetime.now()
+        posx = input(f"{Fore.LIGHTGREEN_EX}[{self.actual_turn['name']}]{Fore.LIGHTGREEN_EX}{Fore.RESET}: {Fore.LIGHTWHITE_EX}Coloca la coordenada X -> {Fore.RESET}")
+        posy = input(f"{Fore.BLUE}[{self.actual_turn['name']}]{Fore.BLUE}{Fore.RESET}: {Fore.LIGHTWHITE_EX}Coloca la coordenada Y -> {Fore.RESET}")
+        self.turn_time = (datetime.now()-self.turn_time).total_seconds()
+        try:
+            posx = int(posx)
+            posy = int(posy)
+        except:
+            print(f"{Fore.RED}[WARNING]{Fore.RED}Las coordenadas deben ser numeros!")
+            self.turn()
 
+        if (not 1 <= posx <= self.rows) or (not 1 <= posy <= self.columns) or (not 1 <= posx <= self.rows and not 1 <= posy <= self.columns):
+            print(f"Las coordenadas deben estar comprendidas entre 1 y {self.rows}!!")
+            self.turn()
 
-    def draw_board(self, table, pos: tuple[int, int], player):
+        self.actual_turn = self._party_cache["players"][1-self._turn_index] #* para obtener el otro jugador.
+        return posx, posy
+        
+
+    def draw_board(self, table, pos: tuple[int, int], player) -> None | bool:
         """# Importante:
             @param ``pos`` es una tupla que describe las coordenadas ``X`` e ``Y``, el orden es sumamente importante.\n
             Las coordenadas deben estar entre ``[1, board_columns] ∈ x``  --- ``[1, board_rows] ∈ y``
         """
         posx, posy = pos[0]-1, pos[1]-1
-        
-        if not 0 <= posx <= self.columns or not 0 <= posy <= self.rows:
-            return False  
+
 
         if table[posx][posy] != "-":
             #? la posicion ya esta cogida, evitamos que tenga que comprobar de que tipo es.
+            print(f"{Fore.RED}[WARNING]{Fore.RED}Ops! Esa posicion ya esta ocupada")
             return False
+            
+                  
         elif table[posx][posy] == player["token"]:
             #? la posicion esta ocupada por una ficha del mismo tipo
-            return True
+            print(f"{Fore.RED}[WARNING]{Fore.RED}Ops! Ya has puesto una ficha en esta posicion!")
+            return False
+
         else:
             #? coloca la ficha
             table[posx][posy] = player["token"]
             
             #? Guarda el movimiento del jugador en su cache. SOLO LAS COORDENADAS
             player["movements"].append(pos)
-            self._party_cache["party"]["movements"].append(self._movtuple(player["token"], player["name"], pos))
+            self._party_cache["party"]["movements"].append(self._movtuple(player["token"], player["name"], pos, self.turn_time))
+            return    
 
 
     def checkWin(self) -> bool:
@@ -179,7 +213,7 @@ class BoardGame:
                 for i in range(1, len(self.board)-1):  #* evitamos pasar otra vez por las esquinas que sabemos que son iguales. 
                     if self.board[i][i] != token:
                         break
-                    elif i == len(self.board)-2:   #* Si la ultima iteracion i es igual a la longitud de la tabla-1, quiere decir que todas las iteraciones anteriores son True, formando una diagonal.
+                    elif i == len(self.board)-2:   #* Si la ultima iteracion i es igual a la longitud de la tabla-2, quiere decir que todas las iteraciones anteriores son True, formando una diagonal.
                         _save_win_to_cache("Downwards diagonal")
                         return True
 
@@ -187,7 +221,7 @@ class BoardGame:
                 for i,s in zip(range(len(self.board)-1, 1, -1), range(1, len(self.board)-1), strict=True):
                     if self.board[i-1][s] != token:
                         break
-                    elif s == len(self.board)-2:   #* Si la ultima iteracion i es igual a la longitud de la tabla-1, quiere decir que todas las iteraciones anteriores son True, formando una diagonal.
+                    elif s == len(self.board)-2:   #* Si la ultima iteracion i es igual a la longitud de la tabla-2, quiere decir que todas las iteraciones anteriores son True, formando una diagonal.
                         _save_win_to_cache("Upwards diagonal")
                         return True
 
@@ -209,7 +243,7 @@ class BoardGame:
                 for i,s in zip(range(len(self.board)-1,1), range(1, len(self.board)-1)):
                     if self.board[i][s] != self.board[0][0]:    #* si alguna del medio no es igual a la primera, no es diagonal.
                         break
-                    elif s == len(self.board)-2:   #* lo mismo
+                    elif s == len(self.board)-2:  
                         _save_win_to_cache("Upwards diagonal")
                         return True
         return False
@@ -221,21 +255,47 @@ class BoardGame:
 
     def init_game(self):
         "Game loop flow, unless you cancel the game or one player win, the game will be cancelled"
-        self.timecounter = datetime.now()
+        self.timecounter = 0
+        self._playing = True
+        self.actual_turn, self._turn_index = None, None
 
-        def calc_passed_time_format():
-            "Main loop timer, this function needs to be refreshed every time."
-            passed_seconds = (datetime.now() - self.timecounter).total_seconds()
+        # def game_loop():
+        #     "Main loop timer, this function needs to be refreshed every time."
+        #     self._initime = datetime.now()
+        #     passed_seconds = (datetime.now() - self._initime).total_seconds()
             
-            hours = int(passed_seconds / 60 / 60)
-            passed_seconds -= hours*60*60
-            minutes = int(passed_seconds/60)
-            passed_seconds -= minutes*60
-            return f"{hours:02d}:{minutes:02d}:{passed_seconds:02d}"
+        #     hours = int(passed_seconds / 60 / 60)
+        #     passed_seconds -= hours*60*60
+        #     minutes = int(passed_seconds/60)
+        #     passed_seconds -= minutes*60
+        #     return f"{hours:02d}:{minutes:02d}:{passed_seconds:02d}"
+        
+        def choice_start() -> None:
+            self.actual_turn = choice(self._party_cache["players"])
+            self._turn_index = self._party_cache["players"].index(self.actual_turn)
         
         cls()
-        while True:
-            ...
+        choice_start()
+        try:
+            while self._playing:
+                # self.timecounter = game_loop()
+                posx, posy = self.turn()
+                draw = self.draw_board(self.board, (posx, posy), self.actual_turn)
+                if not draw and draw is not None:
+                    cls()
+                    self.turn()
+                    self.draw_board(self.board, (posx, posy), self.actual_turn)
+                self._pprint(self.board)
+                cwin = self.checkWin()
+                if cwin:
+                    print(f"{self._party_cache['party']['win']['player_name']} ha ganado !!!")
+                    self._party_cache["party"]["total_time"] = self.timecounter
+                    self._playing = False
+                    break
+        except KeyboardInterrupt:
+            print(f"{Fore.LIGHTYELLOW_EX}Se ha finalizado el juego forzosamente.{Fore.RESET}")
+            exit()
+
 
 if __name__ == "__main__":
     er = [

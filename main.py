@@ -7,27 +7,33 @@ def title() -> None:
     maintitle = Center.Center(Colorate.Horizontal(Colors.blue_to_green, WELCOME_TEXT2), yspaces= 8, xspaces=50)
     print(maintitle)
 title()
-            
+
+
 
 test = BoardGame(3,3, "0", "X") 
-print(test.board)
-movements = [
-    (test.player1, (1, 3)),
-    (test.player2, (3, 3)),
-    (test.player2, (2,2)),
-    (test.player1, (2,3)),
-    (test.player2, (1,1))
-]
+test._clear_caches()
+test.init_game()
 
-for mov in movements:
-    test.draw_board(test.board, mov[1], player = mov[0]) #board, pos (tuple x,y) and player (to know the player name (if it has one) and her token)
-test._pprint(test.board)
-test.checkWin()
 
-print(f"\n{Fore.LIGHTGREEN_EX}DEBUGGING INFO:{Fore.RESET}\n")
-print(f"Party cache: {test.debuginfo}\n")
-print(f"Player1 cache: {test.player1}\n")
-print(f"Player2 cache: {test.player2}\n")
+#* TESTS ///////////////////////
+
+# movements = [
+#     (test.player1, (1, 3)),
+#     (test.player2, (3, 3)),
+#     (test.player2, (2,2)),
+#     (test.player1, (2,3)),
+#     (test.player2, (1,1))
+# ]
+
+# for mov in movements:
+#     test.draw_board(test.board, mov[1], player = mov[0])
+# test._pprint(test.board)
+# test.checkWin()
+
+# print(f"\n{Fore.LIGHTGREEN_EX}DEBUGGING INFO:{Fore.RESET}\n")
+# print(f"Party cache: {test.debuginfo}\n")
+# print(f"Player1 cache: {test.player1}\n")
+# print(f"Player2 cache: {test.player2}\n")
 
 
     
