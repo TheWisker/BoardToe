@@ -27,9 +27,14 @@ def multiple_instcheck(vars: tuple, checks: tuple | None, manual_check: list = N
     else:
         return all(isinstance(e, checks) for e in vars)
 
+def getKey(rawDict: dict, value):
+    if isinstance(rawDict, dict):
+        for k, v in rawDict.items():
+            if v == value:
+                return k
 
 @lru_cache()
-def multiple_replace(rawstr: str, reml: tuple[tuple], count: int = -1):
+def multiple_replace(rawstr: str, reml: tuple[tuple[str, str]], count: int = -1):
     """Replacement optimized function."""
     assert isinstance(rawstr, str), "'rawstr' parameter must be the string representation where the characters will be replaced"
     assert isinstance(reml, tuple), "'reml' must be a tuple containing old-new values to be replaced"
