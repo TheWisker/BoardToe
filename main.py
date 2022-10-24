@@ -21,7 +21,7 @@ test.init_game()
 #     (test.player1, (1, 3)),
 #     (test.player2, (3, 3)),
 #     (test.player2, (2,2)),
-#     (test.player1, (2,3)),
+#     (test.player1, (2,3)),s
 #     (test.player2, (1,1))
 # ]
 

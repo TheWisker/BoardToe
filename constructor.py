@@ -4,14 +4,28 @@ from random import choice, randint
 from time import time, sleep
 from datetime import datetime
 from collections import namedtuple
+from json import dumps
+from os import get_terminal_size
+from threading import Thread
 
 from colorama import Fore
+from pystyle import Center
 
-
+#! Mirar si lo del color de los jugadores es buena idea
 
 class BoardGame:
 
-    def __init__(self, _rows: int, _columns: int, tokenplayer1: str, tokenplayer2: str, player: str = "player1", player2: str = "player2"):
+    def __init__(
+        self, 
+        _rows: int, 
+        _columns: int, 
+        tokenplayer1: str, 
+        tokenplayer2: str, 
+        player1: str = "player1", 
+        player2: str = "player2", 
+        # pl1color: str = None,
+        # pl2color: str = None
+    ):
         
         if not multiple_instcheck((_rows, _columns), int):
             raise TypeError("Rows and columns must be a numerical parameters")
@@ -19,23 +33,26 @@ class BoardGame:
         elif _rows != _columns or not 9 <= _rows * _columns <= 64:   #3x3 - 8x8 -> Min & max board range
             raise ValueError("The number of rows and columns must be equals or the table size is minor than 3x3 or mayor than 8x8 (Max table size of 8x8)")
         
-        elif not multiple_instcheck((player, player2), str):
+        elif not multiple_instcheck((player1, player2), str):
             raise ValueError("Player attribute must be a string saying the name of the player")
         elif not multiple_instcheck((tokenplayer1, tokenplayer2), str) or tokenplayer1 == tokenplayer2:
             raise TypeError("Token player must be X or O and each player must define a different token")
 
         self.rows           = _rows
         self.columns        = _columns
+       
+        self.XCOLOR         = Fore.LIGHTRED_EX
+        self.OCOLOR         = Fore.LIGHTWHITE_EX
 
-        self.player1        = self._make_player_cache(player, tokenplayer1)
-        self.player2        = self._make_player_cache(player2, tokenplayer2)
+        self.player1        = self._make_player_cache(player1, tokenplayer1, self.OCOLOR if tokenplayer1 == "0" else self.XCOLOR)
+        self.player2        = self._make_player_cache(player2, tokenplayer2, self.OCOLOR if tokenplayer2 == "0" else self.XCOLOR)
         
         self.board          = self._make_board()
-        self.partycounter   = 0
         
         self._movtuple      = namedtuple("Movement", ["token", "player_name", "position", "moviment_time"])
         self._ptycachetuple = namedtuple("PartyCache", ["dictmap"])
         self._party_cache   = self._make_party_cache()
+        self._game_cache = []
         self.debuginfo      = self._ptycachetuple(self._party_cache)
 
     @property
@@ -49,31 +66,36 @@ class BoardGame:
             "board_size": (self.rows, self.columns), 
             "players": (self.player1, self.player2), 
             "party": {
+                "total_time": 0,
                 "win": False,    #? Cuando un jugador gana, este atributo se convierte en diccionario 
-                "movements": [],
-                "total_time": 0
+                "movements": []
             }
         }
         return party_cache
         
-    def _make_player_cache(self, player, token) -> dict[str,]:
+    def _make_player_cache(self, player, token, color) -> dict[str,]:
         "Makes a player cache."
 
         cache = {
             "name": player,
             "token": token.strip().upper(),
+            "color": color,
             "movements": [],    #? Aqui solo se guarda la posicion del movimiento.
             "timings": [],
+            "best_timing": None,
+            "worst_timing": None
         }
         return cache
 
     def _clear_caches(self):
         "Limpia la cache."
-        player1n, tknpl1 = self.player1["name"], self.player1["token"]
-        player2n, tknpl2 = self.player2["name"], self.player2["token"]
-        self.player1        = self._make_player_cache(player1n, tknpl1)
-        self.player2        = self._make_player_cache(player2n, tknpl2)
-        self._party_cache = self._make_party_cache()
+
+        player1n, tknpl1, colorpl1 = self.player1["name"], self.player1["token"], self.player1["color"]
+        player2n, tknpl2, colorpl2 = self.player2["name"], self.player2["token"], self.player2["color"]
+
+        self.player1        = self._make_player_cache(player1n, tknpl1, colorpl1)
+        self.player2        = self._make_player_cache(player2n, tknpl2, colorpl2)
+        self._party_cache   = self._make_party_cache()
         return
 
     def _make_board(self) -> list:
@@ -91,45 +113,51 @@ class BoardGame:
 
     def _pprint(self, table) -> None:
         "Prints the table in a pretty way (without colons and token-colored)"
+        
+        columns, lines = get_terminal_size().columns, get_terminal_size().lines
         print("\n")     # white line to stylize
         for i, column in enumerate(table):
-            print(multiple_replace(f"\t{i+1} {column}", 
+            print(multiple_replace("{} {}{}".format(" "*(columns//2-self.rows//2), i+1, column), 
                     (
                         ("'", ""), 
                         (",", "  "), 
                         ("[", f"{Fore.LIGHTBLUE_EX}|{Fore.RESET} "),
                         ("]", f" {Fore.LIGHTBLUE_EX}|{Fore.RESET}"),
-                        ("0", f"{Fore.LIGHTWHITE_EX}0{Fore.RESET}"), 
-                        ("X", f"{Fore.LIGHTRED_EX}X{Fore.RESET}")
+                        ("0", f"{self.OCOLOR}0{Fore.RESET}"), 
+                        ("X", f"{self.XCOLOR}X{Fore.RESET}")
                     )
                 )
             )
+        print("\n")     # white line to stylize
+
 
 
     #! PUBLIC METHODS   ----------------------------------------------------------------
 
     def turn(self) -> tuple[int, int]:
         "Fuction to manage the turns"
+        
+        player_color = self.actual_turn["color"]
+
         self.turn_time = datetime.now()
-        posx = input(f"{Fore.LIGHTGREEN_EX}[{self.actual_turn['name']}]{Fore.LIGHTGREEN_EX}{Fore.RESET}: {Fore.LIGHTWHITE_EX}Coloca la coordenada X -> {Fore.RESET}")
-        posy = input(f"{Fore.BLUE}[{self.actual_turn['name']}]{Fore.BLUE}{Fore.RESET}: {Fore.LIGHTWHITE_EX}Coloca la coordenada Y -> {Fore.RESET}")
-        self.turn_time = (datetime.now()-self.turn_time).total_seconds()
+        posx = input(f"{player_color}[{self.actual_turn['name']}]{Fore.RESET}: {Fore.LIGHTWHITE_EX}Coloca la coordenada X -> {Fore.RESET}")
+        posy = input(f"{player_color}[{self.actual_turn['name']}]{Fore.RESET}: {Fore.LIGHTWHITE_EX}Coloca la coordenada Y -> {Fore.RESET}")
+        self.turn_time = round((datetime.now()-self.turn_time).total_seconds(), 2)
         try:
             posx = int(posx)
             posy = int(posy)
         except:
             print(f"{Fore.RED}[WARNING]{Fore.RED}Las coordenadas deben ser numeros!")
-            self.turn()
+            return self.turn()
 
         if (not 1 <= posx <= self.rows) or (not 1 <= posy <= self.columns) or (not 1 <= posx <= self.rows and not 1 <= posy <= self.columns):
             print(f"Las coordenadas deben estar comprendidas entre 1 y {self.rows}!!")
-            self.turn()
-
-        self.actual_turn = self._party_cache["players"][1-self._turn_index] #* para obtener el otro jugador.
+            return self.turn()
+        
         return posx, posy
         
 
-    def draw_board(self, table, pos: tuple[int, int], player) -> None | bool:
+    def draw_board(self, table, pos: tuple[int, int], player) -> None:
         """# Importante:
             @param ``pos`` es una tupla que describe las coordenadas ``X`` e ``Y``, el orden es sumamente importante.\n
             Las coordenadas deben estar entre ``[1, board_columns] ∈ x``  --- ``[1, board_rows] ∈ y``
@@ -139,22 +167,30 @@ class BoardGame:
 
         if table[posx][posy] != "-":
             #? la posicion ya esta cogida, evitamos que tenga que comprobar de que tipo es.
-            print(f"{Fore.RED}[WARNING]{Fore.RED}Ops! Esa posicion ya esta ocupada")
-            return False
+            print(f"{Fore.RED}[WARNING]{Fore.RED} Ops! Esa posicion ya esta ocupada. (Posicion: {pos}")
+
+            posx, posy = self.turn()
+            return self.draw_board(table, (posx, posy), player)
             
                   
         elif table[posx][posy] == player["token"]:
             #? la posicion esta ocupada por una ficha del mismo tipo
-            print(f"{Fore.RED}[WARNING]{Fore.RED}Ops! Ya has puesto una ficha en esta posicion!")
-            return False
+            print(f"{Fore.RED}[WARNING]{Fore.RED} Ops! Ya has puesto una ficha en esta posicion!")
+            posx, posy = self.turn()
+            return self.draw_board(table, (posx, posy), player)
 
         else:
-            #? coloca la ficha
             table[posx][posy] = player["token"]
             
             #? Guarda el movimiento del jugador en su cache. SOLO LAS COORDENADAS
-            player["movements"].append(pos)
+            player["movements"].append((posx, posy))
+            player["timings"].append(self.turn_time)
+
             self._party_cache["party"]["movements"].append(self._movtuple(player["token"], player["name"], pos, self.turn_time))
+            
+            _last_turn_index = self._party_cache["players"].index(self.actual_turn)-1 #? len de la lista de jugadores (siempre 1)
+            self.actual_turn = self._party_cache["players"][_last_turn_index]   
+            #* para obtener el otro jugador se busca el indice del jugador y se le resta 1.
             return    
 
 
@@ -188,6 +224,8 @@ class BoardGame:
 
 
         for subarrays in self.board:
+            if subarrays[0] == "-":
+                continue
             if all(elem == subarrays[0] for elem in subarrays):
                 _save_win_to_cache("Horizontal")
                 return True
@@ -255,46 +293,55 @@ class BoardGame:
 
     def init_game(self):
         "Game loop flow, unless you cancel the game or one player win, the game will be cancelled"
-        self.timecounter = 0
-        self._playing = True
-        self.actual_turn, self._turn_index = None, None
 
-        # def game_loop():
-        #     "Main loop timer, this function needs to be refreshed every time."
-        #     self._initime = datetime.now()
-        #     passed_seconds = (datetime.now() - self._initime).total_seconds()
-            
-        #     hours = int(passed_seconds / 60 / 60)
-        #     passed_seconds -= hours*60*60
-        #     minutes = int(passed_seconds/60)
-        #     passed_seconds -= minutes*60
-        #     return f"{hours:02d}:{minutes:02d}:{passed_seconds:02d}"
+        self._clear_caches()     #* vacia la cache para iniciar una nueva partida, aunque ya se haya limpiado antes.
+        self.partycounter        = datetime.now()       
+        self._playing            = True
+        self.actual_turn         = None
+
         
         def choice_start() -> None:
             self.actual_turn = choice(self._party_cache["players"])
-            self._turn_index = self._party_cache["players"].index(self.actual_turn)
-        
-        cls()
+
+
         choice_start()
+
         try:
             while self._playing:
-                # self.timecounter = game_loop()
-                posx, posy = self.turn()
-                draw = self.draw_board(self.board, (posx, posy), self.actual_turn)
-                if not draw and draw is not None:
-                    cls()
-                    self.turn()
-                    self.draw_board(self.board, (posx, posy), self.actual_turn)
                 self._pprint(self.board)
-                cwin = self.checkWin()
-                if cwin:
-                    print(f"{self._party_cache['party']['win']['player_name']} ha ganado !!!")
-                    self._party_cache["party"]["total_time"] = self.timecounter
-                    self._playing = False
+                posx, posy = self.turn()
+                self.draw_board(self.board, (posx, posy), self.actual_turn)
+                
+                if self.checkWin():
+                    self.partycounter = round((datetime.now()-self.partycounter).total_seconds())
+                    self._pprint(self.board)
+                    print(f"{self._party_cache['party']['win']['player_name'].upper()} ha ganado !!!")
                     break
+
+                cls()
+
         except KeyboardInterrupt:
             print(f"{Fore.LIGHTYELLOW_EX}Se ha finalizado el juego forzosamente.{Fore.RESET}")
             exit()
+
+        self.player1["best_timing"]     = min(self.player1["timings"])
+        self.player1["worst_timing"]    = max(self.player1["timings"])
+        self.player2["best_timing"]     = min(self.player2["timings"])
+        self.player2["worst_timing"]    = max(self.player2["timings"])
+
+        self._party_cache["party"]["total_time"] = self.partycounter
+        self._game_cache.append(self._party_cache)
+        self._playing = False
+    
+        print(dumps(self._party_cache))
+
+        self._clear_caches()
+        
+
+
+
+
+
 
 
 if __name__ == "__main__":
