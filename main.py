@@ -1,5 +1,7 @@
 from constants import *
+from langs import *
 from constructor import BoardGame, Fore, time, sleep
+
 from pystyle import Box, Colorate, Colors, Center, Write
 
 
@@ -9,8 +11,10 @@ def title() -> None:
 title()
 
 
+lang = input(f"{LANGS.get_phrase('SPANISH', 'game', 0)} -> ") #¿En que idioma desea jugar?
 
-test = BoardGame(3,3, "0", "X") 
+test = BoardGame(3,3, "0", "X", game_lang=lang) 
+
 test._clear_caches()
 test.init_game()
 
