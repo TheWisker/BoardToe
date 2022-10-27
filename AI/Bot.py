@@ -3,7 +3,7 @@ from random import randint
 
 import AI.core as core
 
-
+#Class intantiated on game start as a player, accepts a parameter the bot player number, and the enemy player number, each turn the get_move function should be called to get the move that this bot plays
 class Bot:
 
     def __init__(self, players: tuple[int, int], difficulty: str = "Easy") -> None:
@@ -21,7 +21,30 @@ class Bot:
                     cases.append(case[1])
         return cases
 
+    """
+    Razonamiento logico del botico:
 
+    Movimiento debe ser procesado de la siguiente manera: cada tipo de movimiento tendra un numero y un jugador asignado, se ejecutara el movimiento con el valor mas alto:
+    0: Random move
+    1: Random move en casilla adyacente a alguna del bot
+    2: Cortar jugada gandora rival
+    3: Ejecutar jugada gandora del bot
+    Este es el metodo simple, para mayor complejidad:
+    0: Random move teniendo en cuenta la mayor cantidad de casillas vacias adyacentes
+    1: Random move en casilla adyacente a alguna del bot teniendo en cuenta si bloquea jugadas posteriores enemigas
+    2: Cortar jugada gandora rival
+    3: Ejecutar jugada gandora del bot
+    Y para la mayor complejidad:
+    0: Random move teniendo en cuenta la mayor cantidad de casillas vacias adyacentes
+    1: Random move en casilla adyacente a alguna del bot teniendo en cuenta si bloquea jugadas posteriores enemigas y si se crea una doble posiblidad de nivel tres lo que asegura una victoria absoulta
+    2: Cortar jugada gandora rival
+    3: Ejecutar jugada gandora del bot
+
+
+    Los posibles movimientos se conseguiran a traves de una funcion que calculara parte y delegara otra al archivo core
+
+    Posible implementacion del cache de botico, con improbable analisis de toma de decisiones (Muy complejo)
+    """
     
     def get_move(self, board) -> tuple[int, int]:
         bot_cases: list[tuple[int, int]] = self._get_cases(board, self.bot)
