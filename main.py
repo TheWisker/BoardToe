@@ -13,7 +13,7 @@ title()
 
 lang = input(f"{Langs.get_phrase('SPANISH', 'game', 0)} -> ") #¿En que idioma desea jugar?
 
-test = BoardGame(3,3, "0", "X", game_lang=lang) 
+test = BoardGame(4,4, "0", "X", game_lang=lang) 
 
 test._clear_caches()
 test.init_game()

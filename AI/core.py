@@ -1,7 +1,10 @@
 """Main core module"""
 
 
-def transform2matrix(table: list[list[int]], reverse_method: bool = None) -> list[int]:
+from pyparsing import empty
+
+
+def transform2matrix(table: list[list[int]], reverse_method: bool = None) -> list:
     """
     ``Transforma una tabla bidimensional o superior con caracteres,
     a una matriz de la misma profundidad con valores numericos o viceversa.``\n
@@ -80,12 +83,12 @@ def hcheck(matrix: list[list[int]]) -> list:
     """``Metodo que comprueba si en la matrix existe una lista que contiene una sucesion horizontal de los mismos elementos.``
     
     Ejemplo:
-    >>>    [0,0,0],
+    >>>    [0,1,0],
     >>>    [1,0,0],
     >>>    [1,1,-1]
     
-    - En este caso la lista de indice ``0`` contiene una solucion horizontal.
-    La funcion retornaria True.
+    - En este caso la lista de indice ``2`` (``[1,1,-1]``) es una sucesion horizontal de los mismos elementos menos 1 elemento que esta vacio.
+    - En ese caso se devuelve la ficha que gana y la posicion que falta para completar esa sucesion horizontal -> ``(1, (2,2))``
     """
 
     results: list = []
@@ -97,8 +100,7 @@ def hcheck(matrix: list[list[int]]) -> list:
             continue
 
         empty_index: int = subarrays.index(-1)    # sabemos que las listas tienen al menos un -1, buscamos su indice
-        subarrays.pop(empty_index)                # eliminamos el -1 de la lista para comprobar si los demas son iguales
-        if all(x == subarrays[0] for x in subarrays):
+        if all(x == subarrays[0] for x in subarrays if subarrays.index(x) != empty_index):
             results.append((subarrays[0], (i, empty_index))) #* (jugador que gana, (posicion donde puede ganar))
         else:
             continue
@@ -117,17 +119,9 @@ def rotate_index(index: tuple[int, int], depth: int) -> tuple[int, int]:
    | [0,0,1],
    | [0,1,0]
 
-    [0,0,1],
-    [1,0,1],
-    [0,1,1]
-    
-    [0,1,0],
-    [1,0,0],
-    [1,1,1]
-
-    [-1,1,0],
-    [1,0,1],
-    [1,0,0]
+    [0, 0 ,1],
+    [1, 0 ,1],
+    [0, 1 ,1]
 
 
 
@@ -150,16 +144,15 @@ def rotate_index(index: tuple[int, int], depth: int) -> tuple[int, int]:
     return result
     
 
-def check_can_win(binmatrix: list[int]) -> list: #Checks if any player can win in one movement  and returns the results like: [(player, (x,y))]
+def check_enemy_win(binmatrix: list[list[int]]) -> list: #Checks if the enemy player can win in one movement  and returns the results like: [(player, (x,y))]
     results: list = []
     
     results.extend(hcheck(binmatrix)) #Horizontal
-    results.extend(hcheck(rotate_matrix(binmatrix))) #Vertical ROTATE RESULTS
+    results.extend(rotate_index(hcheck(rotate_matrix(binmatrix)))) #Vertical ROTATE RESULTS
     
     #DIAGONAL METHOD    
         
     return results
-    ...
 
 
 
@@ -221,18 +214,20 @@ def show_matrix(matrix: list[list[int]]) -> None:
 
 if __name__ == "__main__":
     raw_matrix = [
-        ["0", "0", "X"],
-        ["X", "0", "X"],
-        ["0", "X", "-"]
+        ["-", "0", "X", "0", "-", "X"],
+        ["X", "0", "X", "-", "X", "X"],
+        ["X", "0", "-", "0", "X", "X"],
+        ["X", "0", "X", "-", "X", "X"],
+        ["X", "0", "X", "X", "X", "X"],
+        ["0", "-", "0", "0", "X", "0"]
     ]
 
     bin_matrix = transform2matrix(raw_matrix)
     # print(bin_matrix)
     #print(check_matrix(bin_matrix))
+    # print(rotate_matrix(bin_matrix))
 
-    print(rotate_matrix(bin_matrix))
-
-    # print(hcheck(bin_matrix)) #DEMUESTRA EL PORQUE HAY QUE ROTAR LOS RESULTADOS TAMBIEN
+    print(check_enemy_win(bin_matrix))
     # print(hcheck(rotate_matrix(bin_matrix)))
    
     

@@ -7,8 +7,8 @@ __all__ = ["LANGS"]
 class Langs:
     
     traductor = GoogleTranslator
-    langs_supported: list[str] = traductor().get_supported_languages()
-    _maplangs: dict[str, str] = traductor().get_supported_languages(as_dict=True)
+    langs_supported: list[str] = ["SPANISH", "ENGLISH", "CROATIAN", "GALICIAN", "CATALAN", "PORTUGUESE", "DUTCH", "GERMAN", "ITALIAN", "CHINESE (simplified)", "JAPANESE", "FRENCH", "RUSSIAN", "HINDI", "DANISH", "SERBIAN"] 
+
     langs = {
             "SPANISH": {
                 "errors": [
@@ -39,27 +39,23 @@ class Langs:
     def _init_langs(self) -> None:
         "Inicializa la traducion de todos los idiomas y los guarda en el diccionario ``langs'' ya iniciado"
         for i in Langs.langs_supported:
-            print(i)
-            if i.upper() == "SPANISH":
+            if i == "SPANISH":
                 continue
             else:
-                self.langs[i.upper()] = {"errors": [], "game": []}
+                    self.langs[i.upper()] = {"errors": [], "game": []}
         return
 
     def _load_langs(self):
-        ...
-            # for n,d in self.langs.items():
-            #     for i in self.langs[i]:
+        for level,p in self.langs["SPANISH"].items():
+            for ln, lv in self.langs.items():
+                self.langs[ln][level] = self.traductor(source= "spanish", target=ln.lower().lower()).translate_batch(p)
 
     @staticmethod
     def get_phrase(lang: str, level: str, index: int) -> str:
         if not lang.upper() in Langs.langs_supported:
             raise ValueError(f"This language is not set!!. Available langs: {Langs.langs_supported}")
         return Langs.langs[lang.upper()][level][index]
-        
-
-t = Langs()
-print(t.langs)
+    
     
 
 

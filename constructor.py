@@ -135,7 +135,7 @@ class BoardGame:
             Despues: 
             >>> t = [['-' for _ in range(len(table))] for _ in range(len(table))]"""
 
-        t = [['-' for _ in range(len(self.rows))] for _ in range(len(self.columns))]
+        t = [['-' for _ in range(self.rows)] for _ in range(self.columns)]
         return t
 
 
