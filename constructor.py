@@ -9,13 +9,12 @@ from os import get_terminal_size
 from threading import Thread
 
 from colorama import Fore
-from pystyle import Center
 
 
 
 class BoardGame:
 
-    AVARIABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
+    AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
     XCOLOR              = Fore.LIGHTRED_EX      #* static color for 'X' if player does not give any color
     OCOLOR              = Fore.LIGHTWHITE_EX    #* static color for '0' if player does not give any color
 
@@ -76,7 +75,7 @@ class BoardGame:
 
     @property 
     def show_available_colors(self) -> list[str]:
-        return self.AVARIABLE_COLORS
+        return self.AVAILABLE_COLORS
 
 
     def _make_party_cache(self) -> dict[str,]:
@@ -317,13 +316,6 @@ class BoardGame:
         return False
 
 
-    """
-        er = [
-        ['x', '0', '0'],
-        ['', '0', 'x'],
-        ['', 'x', '0']
-    ]
-    """
     def checkDraw(self) -> bool:
 
         empty_locs = 0
@@ -344,9 +336,6 @@ class BoardGame:
         return False
                 
         
-            
-
-
     def init_game(self):
         "Game loop flow, unless you cancel the game or one player win, the game will be cancelled"
 
@@ -377,7 +366,7 @@ class BoardGame:
                 if self.checkDraw():
                     self.partycounter = round((datetime.now()-self.partycounter).total_seconds())
                     self._pprint(self.board)      
-                    print(f"")
+                    print(f"EMPATE!!")
                     break              
 
                 cls()
