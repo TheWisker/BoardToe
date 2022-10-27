@@ -4,12 +4,12 @@
 __all__: tuple[str, ...] = (
     "__authors__",
     "__description__",
-    "__autrepo__",
+    "__autsrepo__",
     "__repository__",
     "__copyright__",
     "__license__",
     "__version__",
-    "__maintainer__",
+    "__maintainers__",
     "__email__",
     "__status__",
 )
@@ -27,6 +27,6 @@ __autsrepo__: Final[tuple[str, str]] = "https://github.com/Backist", "https://gi
 __copyright__: Final[str] = "Copyright 2022-Present Backtist-TheWisker"
 __license__: Final[str] = ""
 __version__: Final[str] = "0.1.1"
-__maintainer__: Final[str] = __authors__
+__maintainers__: Final[str] = __authors__
 __email__: Final[str] = "alvarodrumer54@gmail.com"
 __status__: Final[str] = "Pre-Alpha Release -- Not stable"

@@ -3,12 +3,11 @@
 
 from timeit import Timer
 
-
 table = [
-    ["X", "-", "0"],
-    ["0", "X", "-"],
-    ["-", "-", "0"]
-]
+        ["0", "0", "-"],
+        ["X", "-", "X"],
+        ["-", "0", "0"]
+    ]
 
 def benchmark(stmt, n=1000, r=3, **kwargs):
     timer = Timer(stmt, **kwargs)
@@ -67,6 +66,33 @@ for i in range(len(table)):
         globals= {"table": table}
     )
 }
-        
-run_tests("Pruebas_1", tests1)
 
+bot_tests_suite = {
+    "Check matrix horizontal algorithm": benchmark(
+        """
+def check_matrix(matrix: list[int]) -> bool | list[tuple[int, tuple[int, int]]]:
+    results: list[tuple[int, tuple[int, int]]] = []
+
+    for i, subarrays in enumerate(matrix):
+
+        if all(elem == -1 for elem in subarrays) or all(elem != -1 for elem in subarrays):   
+            #* si alguna lista es totalmente vacia, que continue 
+            continue
+        elif all(elem == subarrays[0] for elem in subarrays):   #* si una lista esta completa, ha ganado
+            return 0
+        matches: list[int] = [x for x in subarrays if x == -1]  #* almacena los elementos que estan vacios
+
+        if len(subarrays)-len(matches) == len(subarrays)-1:
+            alr_list = [x for x in subarrays if x not in matches]
+            if all(x == alr_list[0] for x in alr_list):
+                results.append((alr_list[0], (i, subarrays.index(matches[0]))))
+            else:
+                continue
+    return results
+        """
+    , globals = {"results": [], "table": table}
+    ),
+}
+        
+run_tests("Pruebas 1", tests1)
+run_tests("Bot Suite (Core)", bot_tests_suite)

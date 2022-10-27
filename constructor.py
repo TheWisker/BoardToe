@@ -1,5 +1,6 @@
 from utils import *
-from langs import *
+from langs import Langs
+import AI.core as core
 
 from random import choice, randint
 from time import time, sleep
@@ -173,20 +174,20 @@ class BoardGame:
         player_color = self.actual_turn["color"]
 
         self.turn_time = datetime.now()
-        posx = input(f"{player_color}[{self.actual_turn['name']}]{Fore.RESET}: {Fore.LIGHTWHITE_EX}{LANGS.get_phrase(self.game_lang, 'game', 3).format('X')} -> {Fore.RESET}") 
+        posx = input(f"{player_color}[{self.actual_turn['name']}]{Fore.RESET}: {Fore.LIGHTWHITE_EX}{Langs.get_phrase(self.game_lang, 'game', 3).format('X')} -> {Fore.RESET}") 
         #Coloca la coordenada {}
-        posy = input(f"{player_color}[{self.actual_turn['name']}]{Fore.RESET}: {Fore.LIGHTWHITE_EX}{LANGS.get_phrase(self.game_lang, 'game', 3).format('Y')} -> {Fore.RESET}") 
+        posy = input(f"{player_color}[{self.actual_turn['name']}]{Fore.RESET}: {Fore.LIGHTWHITE_EX}{Langs.get_phrase(self.game_lang, 'game', 3).format('Y')} -> {Fore.RESET}") 
         #Coloca la coordenada {}
         self.turn_time = round((datetime.now()-self.turn_time).total_seconds(), 2)
         try:
             posx = int(posx)
             posy = int(posy)
         except:
-            print(f"\n{Fore.RED}[WARNING] -> {LANGS.get_phrase(self.game_lang, 'errors', 0)}{Fore.RESET}") #Las coordenadas deben ser numeros!
+            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 0)}{Fore.RESET}") #Las coordenadas deben ser numeros!
             return self.turn()
 
         if (not 1 <= posx <= self.rows) or (not 1 <= posy <= self.columns) or (not 1 <= posx <= self.rows and not 1 <= posy <= self.columns):
-            print(f"\n{Fore.RED}[WARNING] -> {LANGS.get_phrase(self.game_lang, 'errors', 1).format(self.rows)}{Fore.RESET}") #Las coordenadas deben estar entre 1 y {}
+            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 1).format(self.rows)}{Fore.RESET}") #Las coordenadas deben estar entre 1 y {}
             return self.turn()
         
         return posx, posy
@@ -202,7 +203,7 @@ class BoardGame:
 
         if table[posx][posy] != "-":
             #? la posicion ya esta cogida hmmm que rico, evitamos que tenga que comprobar de que tipo es.
-            print(f"\n{Fore.RED}[WARNING] -> {LANGS.get_phrase(self.game_lang, 'errors', 2).format(pos, table[posx][posy])}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
+            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 2).format(pos, table[posx][posy])}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
 
             posx, posy = self.turn()
             return self.draw_board(table, (posx, posy), player)
@@ -210,7 +211,7 @@ class BoardGame:
                   
         elif table[posx][posy] == player["token"]:
             #? la posicion esta ocupada por una ficha del mismo tipo
-            print(f"\n{Fore.RED}[WARNING] -> {LANGS.get_phrase(self.game_lang, 'errors', 3)}{Fore.RESET}") #¡Ya has puesto una ficha en esta posicion!
+            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 3)}{Fore.RESET}") #¡Ya has puesto una ficha en esta posicion!
             posx, posy = self.turn()
             return self.draw_board(table, (posx, posy), player)
 
@@ -315,6 +316,13 @@ class BoardGame:
                         return True
         return False
 
+    def _checkwin2(self) -> bool:
+        """Second option to make the win method"""
+
+        bintable = core.transform2matrix(self.board)
+        core.hcheck(bintable)
+        core.hcheck(core.rotate_matrix(bintable))
+
 
     def checkDraw(self) -> bool:
 
@@ -360,7 +368,7 @@ class BoardGame:
                 if self.checkWin():
                     self.partycounter = round((datetime.now()-self.partycounter).total_seconds())
                     self._pprint(self.board)
-                    print(f"{LANGS.get_phrase(self.game_lang, 'game', 2).format(self._party_cache['party']['win']['player_name'].upper())}") #¡{} ha ganado!
+                    print(f"{Langs.get_phrase(self.game_lang, 'game', 2).format(self._party_cache['party']['win']['player_name'].upper())}") #¡{} ha ganado!
                     break
 
                 if self.checkDraw():
@@ -372,7 +380,7 @@ class BoardGame:
                 cls()
 
         except KeyboardInterrupt:
-            print(f"\n{Fore.LIGHTYELLOW_EX}[GAME LOOP STOPED] -> {LANGS.get_phrase(self.game_lang, 'runtime', 0)}{Fore.RESET}") #Se ha finalizado el juego forzosamente.
+            print(f"\n{Fore.LIGHTYELLOW_EX}[GAME LOOP STOPED] -> {Langs.get_phrase(self.game_lang, 'runtime', 0)}{Fore.RESET}") #Se ha finalizado el juego forzosamente.
             exit()
 
         self.player1["best_timing"]     = min(self.player1["timings"])
@@ -388,10 +396,6 @@ class BoardGame:
 
         self._clear_caches()
         
-
-
-
-
 
 
 
