@@ -18,7 +18,7 @@ class Bot:
         if results is not bool:
             for case in results:
                 if case[0] == player:
-                    cases.append(case[1])
+                    cases.append(case[1]) 
         return cases
 
     """
