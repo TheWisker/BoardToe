@@ -68,29 +68,81 @@ for i in range(len(table)):
 }
 
 bot_tests_suite = {
-    "Check matrix horizontal algorithm": benchmark(
+    "HCheck 1": benchmark(
+
         """
 def check_matrix(matrix: list[int]) -> bool | list[tuple[int, tuple[int, int]]]:
     results: list[tuple[int, tuple[int, int]]] = []
 
-    for i, subarrays in enumerate(matrix):
-
-        if all(elem == -1 for elem in subarrays) or all(elem != -1 for elem in subarrays):   
-            #* si alguna lista es totalmente vacia, que continue 
+    for i, subarray in enumerate(matrix):
+        
+        if all(elem == -1 for elem in subarray) or all(elem == subarray[0] for elem in subarray):
             continue
-        elif all(elem == subarrays[0] for elem in subarrays):   #* si una lista esta completa, ha ganado
-            return 0
-        matches: list[int] = [x for x in subarrays if x == -1]  #* almacena los elementos que estan vacios
-
-        if len(subarrays)-len(matches) == len(subarrays)-1:
-            alr_list = [x for x in subarrays if x not in matches]
-            if all(x == alr_list[0] for x in alr_list):
-                results.append((alr_list[0], (i, subarrays.index(matches[0]))))
-            else:
-                continue
+        elif subarray.count(-1) == 1:   
+            empty_index: int = subarray.index(-1)
+            if all(x == subarray[i] for x in subarray if subarray.index(x) != empty_index):
+                results.append((subarray[i], (i, empty_index))) #* (jugador que gana, (posicion donde puede ganar))
     return results
+        """, 
+        n=20
+    ),
+    "HCheck 2": benchmark(
+
         """
-    , globals = {"results": [], "table": table}
+def check_matrix(matrix: list[int]) -> bool | list[tuple[int, tuple[int, int]]]:
+    results: list[tuple[int, tuple[int, int]]] = []
+
+    for i, subarray in enumerate(matrix):
+
+        if all(elem == -1 for elem in subarray) or all(elem == subarray[0] for elem in subarray):
+            #* si alguna lista es totalmente vacia,  o son iguales, que continue 
+            continue
+        elif subarray.count(-1) == 1:   
+            empty_index: int = subarray.index(-1)    # sabemos que las listas tienen al menos un -1, buscamos su indice
+            if len(set(subarray)) == 2:
+                results.append((subarray[i], (i, empty_index))) #* (jugador que gana, [posicion donde puede ganar])
+    return results
+        """, 
+        n=2000
+    ),
+
+    "Rotate index tuple2list convertion": benchmark(
+
+        """
+def rotate_index(index: list[tuple[int, int]], depth: int) -> list[tuple[int, int]]:
+    assert isinstance(index, list) or not index, "@index param must be list with indexs"
+
+    if len(index) < 1:
+        return None
+    
+    index = [list(i) for i in index]
+    for i in index:
+        temp = i[1]
+        i[1] = i[0]
+        i[0] = depth-1-temp
+        index[index.index(i)] = i
+    return [tuple(i) for i in index]
+        """,
+        n= 20
+    ),
+
+    "Rotate index without convertion": benchmark(
+
+        """
+def rotate_index(index: list[list[int, int]], depth: int) -> list[tuple[int, int]]:
+    assert isinstance(index, list) or not index, "@index param must be list with indexs"
+
+    if len(index) < 1:
+        return None
+    
+    for i in index:
+        temp = i[1]
+        i[1] = i[0]
+        i[0] = depth-1-temp
+        index[index.index(i)] = i
+    return index
+        """,
+        n= 20
     ),
 }
         

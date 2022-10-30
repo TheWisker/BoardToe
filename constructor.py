@@ -1,6 +1,8 @@
 from utils import *
 from langs import Langs
+from AI.Bot import Bot
 import AI.core as core
+
 
 from random import choice, randint
 from time import time, sleep
@@ -26,10 +28,11 @@ class BoardGame:
         tokenplayer1: str, 
         tokenplayer2: str, 
         player1: str = "player1", 
-        player2: str = "player2", 
+        player2: str | Bot = "player2", 
         pl1color: str = None,
         pl2color: str = None,
-        game_lang: str = "SPANISH"
+        game_lang: str = "SPANISH",
+        game_mode: int = 1
     ):
         
         if not multiple_instcheck((_rows, _columns), int):
@@ -59,7 +62,7 @@ class BoardGame:
 
         self.player1        = self._make_player_cache(player1, tokenplayer1, pl1color if pl1color is not None else self.OCOLOR if tokenplayer1 == "0" else self.XCOLOR)
         self.player2        = self._make_player_cache(player2, tokenplayer2, pl2color if pl2color is not None else self.OCOLOR if tokenplayer2 == "0" else self.XCOLOR)
-        
+
         self.board          = self._make_board()
         self._playing       = False
         
@@ -414,9 +417,10 @@ if __name__ == "__main__":
     ]
 
     er3 = [
-        ['', '', '', '', '0'],
-        ['', '', '', '0', ''],
-        ['', '', '0', '', ''],
-        ['', '0', '', '', ''],
-        ['0', '', '', '', '']
+        ['X', '', '', '', '', '0'],
+        ['', 'X', '', '', '0', ''],
+        ['', '', '', '0', '', ''],
+        ['', '', '', 'X', '', ''],
+        ['', '0', '', '', 'X', '']
+        ['0', '', '', '', '', 'X']
     ]
