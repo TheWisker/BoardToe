@@ -110,6 +110,7 @@ def hcheck(matrix: list[list[int]]) -> list:
 def check_adjacent(matrix: list[list[int]]) -> list[tuple[int, tuple[int, int]]]: #[(player, (x,y))]
     "Fucntion that returns a list with the adjacent positions to each player"
     assert isinstance(matrix, list) and 3 <= len(matrix), f"Param @matrix must be a list and depth <= 3, no {type(matrix).__name__}"
+    #TERMINALO PERRACO
 
 
 def rotate_index(index: tuple[int, int], depth: int) -> tuple[int, int]:
@@ -230,4 +231,18 @@ if __name__ == "__main__":
     print(check_enemy_win(bin_matrix))
     # print(hcheck(rotate_matrix(bin_matrix)))
    
-    
+    """
+    Vamos a ver, no puedo acabar el bot sin las siguientes funciones: 
+        · check_win(player) Checkea si el jugador pasado de argumento (0 o 1) esta a un movimiento de ganar horizontal, vertical y diagonalmente.
+        Devuelve una tupla o lista con todas las posiciones con las que dicho jugador puede ganar y si no hay la devuleve vacia.
+        Ej: return [(x,y), ...]
+        Para mayor comprobacion habria que devolver un booleano que especifique cuanda hay mas de dos posibles jugadas ganadoras si estan relacionadas, si es true es una victoria absoluta, si es false aun puedes perder.
+        Ej: return [(x,y), ...], bool_de_relacion
+        · check_adjacent(player) Checkea todas las posiciones en la tabla donde el jugador pasado de parametro pueda colocar una ficha adyacente a otra suya.
+        Devuelve una tupla o lista con todas las posiciones con las que dicho jugador puede poner adyacentes especificando para cada posicion cuantas fichas adyacentes suyas tiene, cuantas adyacentes eneigas tiene y cuantas vacias adyacentes tiene y si no hay la devuleve vacia.
+        Ej: return [((adyacentes_aliadas, adyacentes_enemigas, adyacentes_vacias), (x,y)),...]
+
+    Con estas dos simples funciones bastaria pero para mayor complejidad metele la siguiente funcion:
+        · check_prediction(player) Checkea el proximo movimiento del jugador pasado segun la propia forma del bot de calcular sus movimientos.
+        return AunNoSeQueDevuelve
+    """
