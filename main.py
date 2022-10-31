@@ -19,7 +19,7 @@ def display_options(field_opts: list[list[str]], fields_names: list[str] = None,
         r.append(f"[{i+1}] {t}\n")
     
     e = Box.DoubleCube("".join(r))
-    print(Center.Center(Colorate.Horizontal(Col.blue_to_red, e)))
+    print(Center.Center(Colorate.Horizontal(Col.cyan_to_blue, e)))
 
 display_options(["Human vs Human", "Human vs CPU", "CPU vs CPU"])
 

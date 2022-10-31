@@ -1,7 +1,8 @@
 """Main core module"""
+import dis
 
 
-def pview(matrix: list[list[int]]) -> None:
+def pretty_view(matrix: list[list[int]]) -> None:
     "Easy, rapid method to get a pretty view of the matrix"
     print("-"*len(matrix)*4)
     for i in matrix:
@@ -101,7 +102,7 @@ def hcheck(matrix: list[list[int]]) -> list:
     for i, subarray in enumerate(matrix):
 
         if all(elem == subarray[0] for elem in subarray) or not -1 in subarray or subarray.count(-1) > 1:
-            #? si los elementos son iguales (todo 1, 0, o -1), o hay mas de un -1, que continue 
+            #? si los elementos son iguales (todo 1, 0 o -1), no hay -1 o hay mas de 2,que continue 
             continue  
         #* sabemos que las listas que tenemos solo tienen un -1
         empty_index: int = subarray.index(-1)
@@ -121,37 +122,40 @@ def dcheck(matrix):
     - En este caso hay una diagonal desde el indice ``[0,0]`` hasta ``[-1][-1]``
     - En ese caso se devuelve la ficha que gana y la posicion que falta para completar esa sucesion diagonal -> ``(0, (2,2))``
     """
+
+    #! LO QUE TIENES QUE HACER ES GUARDAR LOS ELEMENTOS DIAGONALES DE LA LISTA PARA DESPUES PASARLE EL HCHECK.
+    #! DESPUES LO QUE TIEES QUE HACER, ES METERLO AL FINAL DE LA LISTA.
+    
+
+
     r = []
 
     if len(matrix) % 2 != 0:
-        cm = matrix[len(matrix) // 2][len(matrix) // 2]
+        d = []
 
-        if cm == -1:
-            return []
-        
-        else:
+        for i in range(len(matrix)):
+            d.append(matrix[i][i])   
+            print(d)     
+            if len(set(d)) == 2:
+                r.append((d[0] if d[0] != -1 else d[i-1], (i, matrix[i].index(-1))))
 
-            d = []
-            for i in range(len(matrix)):
-                d.append(matrix[i][i])        
-                if len(set(d)) == 2:
-                    r.append((d[0] if d[0] != -1 else d[-1], (i, d.index(-1))))     #! esta MAL
+        # for i,s in zip(range(len(matrix)-1, -1, -1), range(len(matrix)), strict=True):
+        #     d.append(matrix[i][i])
+        #     if len(set(d)) == 2:
+        #         r.append((d[0] if d[0] != -1 else d[-1], (i, d.index(-1))))
 
-            # for i,s in zip(range(len(matrix)-1, -1, -1), range(len(matrix)), strict=True):
-            #     d.append(matrix[i][i])
-            #     if len(set(d)) == 2:
-            #         r.append((d[0] if d[0] != -1 else d[-1], (i, d.index(-1))))
+        return r
 
-            return r
-
-            # elif matrix[0][-1] == matrix[-1][0] and matrix[0][-1] != -1:
-            #     for i,s in zip(range(len(matrix)-1, 1, -1), range(1, len(matrix)-1), strict=True):
-            #         if matrix[i-1][s] != -1:
-            #             break
-            #         elif i == len(matrix)-2 and matrix[i][i] == -1:
-                        # r.append((matrix[i][i], (i, i)))
+        # elif matrix[0][-1] == matrix[-1][0] and matrix[0][-1] != -1:
+        #     for i,s in zip(range(len(matrix)-1, 1, -1), range(1, len(matrix)-1), strict=True):
+        #         if matrix[i-1][s] != -1:
+        #             break
+        #         elif i == len(matrix)-2 and matrix[i][i] == -1:
+                    # r.append((matrix[i][i], (i, i)))
 
     return []
+
+
 
 
 def rotate_index(index: list[tuple[int, int]], depth: int) -> list[tuple[int, int]]:
@@ -193,24 +197,25 @@ def check_adjacent(matrix: list[list[int]]) -> list[tuple[int, tuple[int, int]]]
     #TERMINALO PERRACO
 
 
-def check_enemy_win(matrix: list[list[int]]) -> list: 
+def check_win(matrix: list[list[int]], player) -> list: 
     """Comprueba y devuelve que jugadores pueden ganar colocando una sola ficha
     - NOTE: La funcion puede devolver una lista vacia si ningun jugador esta a un movimiento de ganar
     - NOTE 2: Si los dos jugadores comparten una posicion, se muestran las dos posiciones, no una.
     """
     results: list = []
     
-    results.extend(hcheck(matrix)) #* Horizontal check
-    results.extend(rotate_index([e for e in hcheck(rotate_matrix(matrix))], len(matrix))) #* Vertical check (Rotate matrix)
+    results.extend([p for p in hcheck(matrix) if p[0] == player["token"]] if hcheck(matrix) else hcheck(matrix)) #* Horizontal check
+    results.extend(rotate_index([p for p in hcheck(matrix) if p[0] == player["token"]] if hcheck(matrix) else hcheck(matrix), len(matrix))) #* Vertical check (Rotate matrix)
         
     return results
-  
+
+dis.dis(check_win)
 
 if __name__ == "__main__":
     raw_matrix = [
         ["X", "-", "X"],
-        ["0", "-", "X"],
-        ["-", "0", "X"],
+        ["0", "X", "X"],
+        ["-", "0", "-"],
 
     ]
 
@@ -231,7 +236,7 @@ if __name__ == "__main__":
    
     """
     Vamos a ver, no puedo acabar el bot sin las siguientes funciones: 
-        · check_win(player) Checkea si el jugador pasado de argumento (0 o 1) esta a un movimiento de ganar horizontal, vertical y diagonalmente.
+        · check_win(player, table) Checkea si el jugador pasado de argumento (0 o 1) esta a un movimiento de ganar horizontal, vertical y diagonalmente.
         Devuelve una tupla o lista con todas las posiciones con las que dicho jugador puede ganar y si no hay la devuleve vacia.
         Ej: return [(x,y), ...]
         Para mayor comprobacion habria que devolver un booleano que especifique cuanda hay mas de dos posibles jugadas ganadoras si estan relacionadas, si es true es una victoria absoluta, si es false aun puedes perder.
