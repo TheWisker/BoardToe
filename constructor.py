@@ -66,7 +66,6 @@ class BoardGame:
 
         self.player1        = self._make_player_cache(player1, tokenplayer1, pl1color if pl1color is not None else self.OCOLOR if tokenplayer1 == "0" else self.XCOLOR)
         self.player2        = self._make_player_cache(player2, tokenplayer2, pl2color if pl2color is not None else self.OCOLOR if tokenplayer2 == "0" else self.XCOLOR)
-
         self.board          = self._make_board()
         self._playing       = False
         
@@ -80,13 +79,8 @@ class BoardGame:
         return self._playing
 
     @property 
-    def show_available_colors(self) -> list[str]:
+    def available_colors(self) -> list[str]:
         return self.AVAILABLE_COLORS
-    
-    @staticmethod 
-    def _pltype():
-        return BoardGame._ptycachetuple()
-
 
     def _make_party_cache(self) -> dict[str,]:
         "Makes a party cache."
