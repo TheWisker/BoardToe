@@ -138,7 +138,7 @@ def dcheck(matrix):
         print("asd")
         templist.append(matrix[a][a])  
         if not -1 in templist:
-            continue   
+            continue 
         if len(set(templist)) == 2:
             r.append((templist[templist.index(-1)-1], (templist.index(-1), templist.index(-1))))
 
