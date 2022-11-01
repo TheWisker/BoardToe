@@ -102,12 +102,12 @@ def hcheck(matrix: list[list[int]]) -> list:
     for i, subarray in enumerate(matrix):
 
         if all(elem == subarray[0] for elem in subarray) or not -1 in subarray or subarray.count(-1) > 1:
-            #? si los elementos son iguales (todo 1, 0 o -1), no hay -1 o hay mas de 2,que continue 
             continue  
         #* sabemos que las listas que tenemos solo tienen un -1
         empty_index: int = subarray.index(-1)
-        if len(set(subarray)) == 2:     #? la estructura set no permite elementos iguales, si existen dos (misma ficha y el -1) es que es True
-            results.append((subarray[i if subarray[i] != -1 else i-1], (i, empty_index))) #* (jugador que gana, [posicion donde puede ganar])
+        tempset = list(set(subarray))   #? la estructura set no permite elementos iguales, si existen dos (misma ficha y el -1) es que es True
+        if len(tempset) == 2:     
+            results.append((tempset[empty_index-1], (i, empty_index)))
     return results
 
 
@@ -123,42 +123,32 @@ def dcheck(matrix):
     - En ese caso se devuelve la ficha que gana y la posicion que falta para completar esa sucesion diagonal -> ``(0, (2,2))``
     """
 
-    #! LO QUE TIENES QUE HACER ES GUARDAR LOS ELEMENTOS DIAGONALES DE LA LISTA PARA DESPUES PASARLE EL HCHECK.
-    #! DESPUES LO QUE TIEES QUE HACER, ES METERLO AL FINAL DE LA LISTA.
+    r = []  #? para almacenar los datos finales
+    templist = []
+
+    for i in range(len(matrix)):
+        templist.append(matrix[i][i])  
+        if not -1 in templist:
+            continue   
+        if len(set(templist)) == 2:
+            r.append((templist[templist.index(-1)-1], (templist.index(-1), templist.index(-1))))
+
+    templist.clear()
+    for a in range(0, len(matrix), -1):
+        print("asd")
+        templist.append(matrix[a][a])  
+        if not -1 in templist:
+            continue   
+        if len(set(templist)) == 2:
+            r.append((templist[templist.index(-1)-1], (templist.index(-1), templist.index(-1))))
+
     
-
-
-    r = []
-
-    if len(matrix) % 2 != 0:
-        d = []
-
-        for i in range(len(matrix)):
-            d.append(matrix[i][i])   
-            print(d)     
-            if len(set(d)) == 2:
-                r.append((d[0] if d[0] != -1 else d[i-1], (i, matrix[i].index(-1))))
-
-        # for i,s in zip(range(len(matrix)-1, -1, -1), range(len(matrix)), strict=True):
-        #     d.append(matrix[i][i])
-        #     if len(set(d)) == 2:
-        #         r.append((d[0] if d[0] != -1 else d[-1], (i, d.index(-1))))
-
-        return r
-
-        # elif matrix[0][-1] == matrix[-1][0] and matrix[0][-1] != -1:
-        #     for i,s in zip(range(len(matrix)-1, 1, -1), range(1, len(matrix)-1), strict=True):
-        #         if matrix[i-1][s] != -1:
-        #             break
-        #         elif i == len(matrix)-2 and matrix[i][i] == -1:
-                    # r.append((matrix[i][i], (i, i)))
-
-    return []
+    return r
 
 
 
 
-def rotate_index(index: list[tuple[int, int]], depth: int) -> list[tuple[int, int]]:
+def rotate_index(index: list[tuple[int, int]], depth: int) -> list[tuple[int, int]] | None:
     """
     Rota un indice o una lista de indices correspondientes de una matriz rotada 90 grados para su equivalencia en su matriz original.\n
 
@@ -197,42 +187,64 @@ def check_adjacent(matrix: list[list[int]]) -> list[tuple[int, tuple[int, int]]]
     #TERMINALO PERRACO
 
 
-def check_win(matrix: list[list[int]], player) -> list: 
+def check_win(matrix: list[list[int]], player: dict[str,]) -> list: 
     """Comprueba y devuelve que jugadores pueden ganar colocando una sola ficha
     - NOTE: La funcion puede devolver una lista vacia si ningun jugador esta a un movimiento de ganar
     - NOTE 2: Si los dos jugadores comparten una posicion, se muestran las dos posiciones, no una.
     """
-    results: list = []
-    
-    results.extend([p for p in hcheck(matrix) if p[0] == player["token"]] if hcheck(matrix) else hcheck(matrix)) #* Horizontal check
-    results.extend(rotate_index([p for p in hcheck(matrix) if p[0] == player["token"]] if hcheck(matrix) else hcheck(matrix), len(matrix))) #* Vertical check (Rotate matrix)
-        
-    return results
+    wins: list = []
 
-dis.dis(check_win)
+    rotmatx = rotate_matrix(matrix)
+
+    if not hcheck(matrix):
+        pass
+    elif not hcheck(rotmatx):
+        return []
+
+    wins.extend([p for p in hcheck(matrix) if p[0] == player["token"]]) #* Horizontal check
+    wins.extend(rotate_index([p for p in hcheck(matrix) if p[0] == player["token"]], len(rotmatx)))            #* Vertical check (Rotate matrix)
+    #wins.extend(dcheck(matrix))
+    
+    return wins
+
+# dis.dis(check_win)
 
 if __name__ == "__main__":
-    raw_matrix = [
-        ["X", "-", "X"],
-        ["0", "X", "X"],
-        ["-", "0", "-"],
 
-    ]
+    models: dict[str, str] = {
 
-    er3 = [
-        ['X', '0', '-', 'X', '0'],
-        ['X', '-', 'X', 'X', 'X'],
-        ['X', '0', '0', 'X', '-'],
-        ['X', '0', 'X', 'X', 'X'],
-        ['-', '0', '0', '-', '0']
-    ]
+        1: [
+            ["X", "-", "X"],
+            ["0", "-", "0"],
+            ["0", "O", "X"],
 
-    matrix1 = transform2matrix(raw_matrix)
-    matrix2 = transform2matrix(er3)
-    # print(rotate_matrix(bin_matrix))
+        ],
+        2: [
+            ['X', '0', '-', 'X', '0'],
+            ['-', '-', '0', 'X', 'X'],
+            ['X', '0', '0', 'X', '-'],
+            ['X', '0', '0', 'X', 'X'],
+            ['X', '0', '0', '-', '0']
+        ],
+        3: [
+            [0,  1,  0,  1],
+            [1,  0,  1, -1],
+            [1, 1,  0,  1],
+            [-1,-1, -1, -1]
+        ]
+}
 
-    # print(check_enemy_win(matrix1))
-    print(dcheck(matrix1))
+    matrix1 = transform2matrix(models[1])
+    matrix2 = transform2matrix(models[2])
+
+    # print(hcheck(matrix1))
+    # print(hcheck(matrix2))
+
+    # print(rotate_index([f for f in hcheck(rotate_matrix(matrix2)) if f[0] == 1], len(matrix2)))
+    er: dict[str, str] = {"token": "X"}
+    # print(check_win(matrix1, er))
+    # print(check_win(matrix2, er))
+    print(dcheck(models[3]))
    
     """
     Vamos a ver, no puedo acabar el bot sin las siguientes funciones: 

@@ -17,6 +17,9 @@ from colorama import Fore
 
 class BoardGame:
 
+    _movtuple      = namedtuple("Movement", ["token", "player_name", "position", "moviment_time"])
+    _ptycachetuple = namedtuple("PartyCache", ["dictmap"])
+
     AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
     XCOLOR              = Fore.LIGHTRED_EX      #* static color for 'X' if player does not give any color
     OCOLOR              = Fore.LIGHTWHITE_EX    #* static color for '0' if player does not give any color
@@ -58,6 +61,7 @@ class BoardGame:
         self.rows           = _rows
         self.columns        = _columns
         self.game_lang      = game_lang
+        self.game_mode      = game_mode 
     
 
         self.player1        = self._make_player_cache(player1, tokenplayer1, pl1color if pl1color is not None else self.OCOLOR if tokenplayer1 == "0" else self.XCOLOR)
@@ -66,8 +70,6 @@ class BoardGame:
         self.board          = self._make_board()
         self._playing       = False
         
-        self._movtuple      = namedtuple("Movement", ["token", "player_name", "position", "moviment_time"])
-        self._ptycachetuple = namedtuple("PartyCache", ["dictmap"])
         self._party_cache   = self._make_party_cache()
         self._game_cache = []
         self.debuginfo      = self._ptycachetuple(self._party_cache)
@@ -80,6 +82,10 @@ class BoardGame:
     @property 
     def show_available_colors(self) -> list[str]:
         return self.AVAILABLE_COLORS
+    
+    @staticmethod 
+    def _pltype():
+        return BoardGame._ptycachetuple()
 
 
     def _make_party_cache(self) -> dict[str,]:
