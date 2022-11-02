@@ -1,7 +1,6 @@
 """Main core module"""
 from copy import deepcopy
-
-
+import numpy as np
 
 
 def pretty_view(matrix: list[list[int]]) -> None:
@@ -43,10 +42,12 @@ def transform2matrix(table: list[list[int]], reverse_method: bool = None) -> lis
     return table
 
 
-def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, rtnmat: bool = True) -> list[list[int]] | None:
+def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, numpymethod: bool = False, returnm: bool = True, ) -> list[list[int]] | None:
     """
     ``Rota una matriz en sentido horario. La rotacion es de  90 Grados predeterminadamente``
     - NOTE: ``4 rotaciones equivalen a 360 grados, es decir, a la posicion original.``
+
+    ### Hasta x2 veces mas rapido que el metodo de rotacion de matrices de ``numpy``
     
     ### Ejemplo
     ```
@@ -63,8 +64,13 @@ def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, rtnmat: bool = True
 
     if nofrots > 1:
         for _ in range(nofrots):
-            matrix = rotate_matrix(matrix)
+            matrix = rotate_matrix(matrix, nofrots, numpymethod, returnm)
         return matrix
+
+    if numpymethod:
+        m = np.array(matrix, dtype=int)
+        np.rot90(m, 1, (-1, 0))
+        return m if returnm else None
 
     N = len(matrix)
 
@@ -82,7 +88,7 @@ def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, rtnmat: bool = True
             matrix[i][j] = matrix[i][N - j - 1]
             matrix[i][N - j - 1] = temp
     
-    return matrix if rtnmat else None
+    return matrix if returnm else None
 
 
 def hcheck(matrix: list[list[int]]) -> list[list[int | tuple[int, int]]] | list:
@@ -107,9 +113,8 @@ def hcheck(matrix: list[list[int]]) -> list[list[int | tuple[int, int]]] | list:
             continue  
         #* sabemos que las listas que tenemos solo tienen un -1
         empty_index: int = subarray.index(-1)
-        tempset = list(set(subarray))   #? la estructura set no permite elementos iguales, si existen dos (misma ficha y el -1) es que es True
-        if len(tempset) == 2:     
-            results.append([tempset[tempset.index(-1)-1], (i, empty_index)])
+        if len(set(subarray)) == 2:     
+            results.append([subarray[empty_index-1], (i, empty_index)])
     return results
 
 
@@ -126,24 +131,22 @@ def dcheck(matrix: list[tuple[int]]) -> list[list[int | tuple[int, int]]] | list
     """
 
     r = []  #? para almacenar los datos finales
+    templist = [matrix[i][i] for i in range(len(matrix))]
     
-    templist = []
-    
-    for i in range(len(matrix)):
-        templist.append(matrix[i][i])
-        if not -1 in templist:
-            continue
-        if len(set(templist)) == 2:
-            r.append([templist[templist.index(-1)-1], (templist.index(-1), templist.index(-1))])
+    if templist.count(-1) == 1 and len(set(templist)) == 2:
+        empty_index = templist.index(-1)
+        r.append([templist[empty_index-1], (empty_index, empty_index)])
 
     templist.clear()
+
     for a,i in zip(range(len(matrix)), range(len(matrix)-1, -1, -1), strict=True):
         templist.append(matrix[a][i]) 
-        if not -1 in templist:
-            continue
-        elif len(set(templist)) == 2:
+        if templist.count(-1) == 2 or len(set(templist)) > 2:
+            r.pop()
+            break
+        elif templist[-1] == -1 and templist.count(-1) == 1 and len(set(templist)) == 2:
             r.append([templist[templist.index(-1)-1], (a, i)])
-
+        
     return r
 
 
@@ -183,9 +186,26 @@ def rotate_index(index: list[tuple[int, int]], depth: int) -> list[list[int | tu
 def check_adjacent(matrix: list[list[int]], player: dict[str, str]) -> list[tuple[int, tuple[int, int]]]: #[(player, (x,y))]
     "Fucntion that returns a list with the adjacent positions to each player"
     assert isinstance(matrix, list) and 3 <= len(matrix), f"Param @matrix must be a list and depth <= 3, no {type(matrix).__name__}"
-    
 
-def check_win(matrix: list[list[int]], player: dict[str,]) -> list: 
+    l = []
+
+    def multiple_hcheck(matrix: list[list[int]], player) -> list[list[int | tuple[int, int]]]:
+        results: list = []
+
+        for i, subarray in enumerate(matrix):
+
+            if len(set(subarray)) == 2 and subarray.count(player) == 1:
+                for v,_ in enumerate(subarray):
+                    results.append([player, (i, v)])
+        return results
+
+    l.extend(multiple_hcheck(matrix, player))
+    l.extend(multiple_hcheck(rotate_matrix(matrix), player))
+
+    return l
+
+    
+def check_win(matrix: list[list[int]], player: dict[str,]) -> list[list]: 
     """Comprueba y devuelve que jugadores pueden ganar colocando una sola ficha
     - NOTE: La funcion puede devolver una lista vacia si ningun jugador esta a un movimiento de ganar
     - NOTE 2: Si los dos jugadores comparten una posicion, se muestran las dos posiciones, no una.
@@ -202,14 +222,15 @@ def check_win(matrix: list[list[int]], player: dict[str,]) -> list:
 
     if hcheck(matrix):
         wins.extend([p for p in hcheck(matrix) if p[0] == pltoken])
-    elif hcheck(rotmatx):
+    if hcheck(rotmatx):
         wins.extend(rotate_index([p for p in hcheck(rotmatx) if p[0] == pltoken], len(rotmatx)))  #* Vertical check (Rotate matrix)
-    elif dcheck(matrix):
+    if dcheck(matrix):
         wins.extend([p for p in dcheck(matrix) if p[0] == pltoken])
     
     return wins
 
-# dis.dis(check_win)
+
+
 
 if __name__ == "__main__":
     from dis import dis
@@ -219,14 +240,14 @@ if __name__ == "__main__":
         1: [
             ["X", "-", "X"],
             ["0", "-", "0"],
-            ["X", "O", "X"],
+            ["X", "0", "X"],
 
         ],
         2: [
             ['X', '0', '-', 'X', '0'],
-            ['-', '-', '0', 'X', 'X'],
-            ['X', '0', '0', 'X', '-'],
-            ['X', '0', '0', 'X', 'X'],
+            ['-', '-', '-', 'X', 'X'],
+            ['X', '0', '-', 'X', '-'],
+            ['X', '0', '-', 'X', 'X'],
             ['X', '0', '0', '-', '0']
         ],
         3: [
@@ -240,25 +261,17 @@ if __name__ == "__main__":
             ['-', '-', '0', 'X', 'X', '-', '0', '0'],
             ['X', '0', 'X', 'X', '-', '0', 'X', '-'],
             ['X', '0', '0', 'X', '0', '0', 'X', '0'],
-            ['X', '0', '0', '-', 'X', 'X', '-', 'X'],
-            ['X', '0', '0', 'X', '-', 'X', 'X', '-'],
+            ['X', '0', '0', '0', 'X', 'X', '-', 'X'],
+            ['X', '0', '-', 'X', '-', 'X', 'X', '-'],
             ['X', '0', '0', 'X', 'X', '0', 'X', '0'],
             ['0', '0', 'X', 'X', '0', 'X', '-', 'X']
         ],
-}
+}   
 
-    transform2matrix(models[1])
-    transform2matrix(models[2])
-    transform2matrix(models[4])
+    print(check_adjacent(transform2matrix(models[2]), 0))
 
-    # print(hcheck(matrix1))
-    # print(hcheck(matrix2))
 
-    # print(rotate_index([f for f in hcheck(rotate_matrix(matrix2)) if f[0] == 1], len(matrix2)))
-    er: dict[str, str] = {"token": "X"}
-    print(check_win(models[1], er))
-    # print(check_win(models[2], er))
-   
+
     """
     Vamos a ver, no puedo acabar el bot sin las siguientes funciones: 
         · check_win(player, table) Checkea si el jugador pasado de argumento (0 o 1) esta a un movimiento de ganar horizontal, vertical y diagonalmente.
@@ -273,19 +286,4 @@ if __name__ == "__main__":
     Con estas dos simples funciones bastaria pero para mayor complejidad metele la siguiente funcion:
         · check_prediction(player) Checkea el proximo movimiento del jugador pasado segun la propia forma del bot de calcular sus movimientos.
         return AunNoSeQueDevuelve
-    """
-    """
-    OBSERVACIONES:
-
-    1. Hasta ahora me he dado cuenta que estabamos haciendo algo mal. Todos los metodos que comprobaban si el jugador ganaba en cualquier direccion se devolvia
-    una lista con tuplas, de esa manera no se puede acceder por indices a las cosas y eso es importante, ahora devuelven una lista de listas.
-
-    2. Por algun extraño motivo, las funciones de verificar no funcionan en todos los casos como deberian. Si le pones ejemplos jodidos te da valores que
-    no son. Tengo que ver, no estan perfectas pero estan hechas.
-
-    3. La de adyacent la hare mas tarde, no tengo tiempo ahora.
-
-    4. Un saludo
-
-    5. Puedes comenzar tu si quieres con la de adyacent, asi vamos mas rapido. va que queda poco : )
     """

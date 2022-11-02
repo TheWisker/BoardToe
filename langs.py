@@ -3,7 +3,6 @@ from deep_translator import GoogleTranslator
 
 __all__ = ["LANGS"]
 
-
 class Langs:
     
     traductor = GoogleTranslator

@@ -354,14 +354,11 @@ class BoardGame:
         self.partycounter        = datetime.now()       
         self._playing            = True
         self.actual_turn         = None
-
         
         def choice_start() -> None:
             self.actual_turn = choice(self._party_cache["players"])
 
-
         choice_start()
-
         try:
             while self._playing:
                 self._pprint(self.board)
