@@ -1,6 +1,7 @@
 """Main core module"""
 from copy import deepcopy
 import numpy as np
+from dis import dis
 
 
 def pretty_view(matrix: list[list[int]]) -> None:
@@ -10,6 +11,20 @@ def pretty_view(matrix: list[list[int]]) -> None:
         print(f"{i}")
     print("-"*len(matrix)*4)
     return
+    """
+    print("-"*len(matrix)*4)
+    for i in matrix:
+        print("[ Method")
+        for x in i:
+            print(" "*len(matrix)*2,"[ Line")
+            for c in x:
+                print(" "*len(matrix)*4, f"{c}")
+            print(" "*len(matrix)*2,"]")
+        print("]")
+        
+    print("-"*len(matrix)*4)
+    return
+    """
 
 
 def transform2matrix(table: list[list[int]], reverse_method: bool = None) -> list:
@@ -117,9 +132,10 @@ def hcheck(matrix: list[list[int]]) -> list[list[int | tuple[int, int]]] | list:
             results.append([subarray[empty_index-1], (i, empty_index)])
     return results
 
-
+ #HAY QUE ARREGLARLO IMPLEMENTANDO EL REVERSE MATRIX
 def dcheck(matrix: list[tuple[int]]) -> list[list[int | tuple[int, int]]] | list:
-    """``Metodo usado para comprobar si algun jugador esta a un movimiento de hacer una sucesion diagonal.``
+    """
+    ``Metodo usado para comprobar si algun jugador esta a un movimiento de hacer una sucesion diagonal.``
 
     ### Ejemplo:
     >>>    [0,1,1],
@@ -149,9 +165,9 @@ def dcheck(matrix: list[tuple[int]]) -> list[list[int | tuple[int, int]]] | list
         
     return r
 
-
+""" LUEGO LO ARREGLAMOS
 def rotate_index(index: list[tuple[int, int]], depth: int) -> list[list[int | tuple[int, int]]] | None:
-    """
+    
     Rota un indice o una lista de indices correspondientes de una matriz rotada 90 grados para su equivalencia en su matriz original.\n
 
     - ``@index`` -> El indice o lista de indices.
@@ -167,7 +183,7 @@ def rotate_index(index: list[tuple[int, int]], depth: int) -> list[list[int | tu
     [1,  0,  1]             (1,0) -> (0,1)
     [-1, 0,  1]             (2,0) -> (0,0)                 
     ```
-    """
+    
     assert isinstance(index, list) or not all(isinstance(e, list) for e in index) or not index, "@index param must be list containing tuples that contain integers"
 
     if len(index) < 1:
@@ -181,28 +197,96 @@ def rotate_index(index: list[tuple[int, int]], depth: int) -> list[list[int | tu
         i[1][0] = depth-1-temp
         index[index.index(i)] = i
     return index
+"""
+def filter(): #Filter results by number of ocurrences
+    return
 
+def adjacent_check(matrix: list[list[int]], n: int) -> list[tuple[int, tuple[int, int]]]: #[(player, (x,y))]
+    "Function that returns a list with the adjacent positions to each player"
+    return [].extend(row_check(matrix, n)).extend(row_check(rotate_matrix(matrix), n, True)).extend(cross_check(matrix, n))
 
-def check_adjacent(matrix: list[list[int]], player: dict[str, str]) -> list[tuple[int, tuple[int, int]]]: #[(player, (x,y))]
-    "Fucntion that returns a list with the adjacent positions to each player"
-    assert isinstance(matrix, list) and 3 <= len(matrix), f"Param @matrix must be a list and depth <= 3, no {type(matrix).__name__}"
+def row_check(matrix: list[list[int]], n: int, rt: bool = False) -> list[tuple[int, list[int, int]]]:
+    r: list = []
+    for k,v in enumerate(matrix):
+        if len(set(v)) == 2 and all(x in set(v) for x in [-1, n]):
+            rr: list = []
+            for kk,vv in enumerate(v):
+                if vv == -1:
+                    rr.append(rotate_index([k, kk], len(matrix)) if rt else [k, kk])
+            r.append((v.count(-1), rr))
+    return r
 
-    l = []
+def cross_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[int, int]]]]:
+    return [].extend(dgn_check(matrix, n)).extend(dgn_check(reverse_matrix(matrix), n, True))
 
-    def multiple_hcheck(matrix: list[list[int]], player) -> list[list[int | tuple[int, int]]]:
-        results: list = []
+def dgn_check(matrix: list[list[int]], n: int, rt: bool = False) -> tuple[int, list[list[int, int]]]:
+    r: list = []
+    dgn: list = [matrix[i][i] for i in range(len(matrix))]
+    if len(set(dgn)) == 2 and all(x in set(dgn) for x in [-1, n]):
+        for k,v in enumerate(dgn):
+                r.append(reverse_index([k, k], len(matrix)) if rt else [k, k])
+    return (dgn.count(-1), r)
 
-        for i, subarray in enumerate(matrix):
+def rotate_index(inx: list[int, int], depth: int, b: bool = True) -> list[int, int]:
+    """
+    ONLY ACCEPTS SQUARE MATRIXES FOR NOW
+    Parameters:
+        index: The index as [x, y]
+        matrix_depth: The matrix length, 
+        backwards: If it should rotate backwards or forwards
+    Example:
+        rotate_index([0,0], 3, False) -> [0,2]
+    """
+    r: list = [inx[0], inx[1]] if b else [inx[1], inx[0]]
+    r[1] = r[0]
+    r[0] = depth-1-inx[1]
+    return r if b else [r[1], r[0]]
 
-            if len(set(subarray)) == 2 and subarray.count(player) == 1:
-                for v,_ in enumerate(subarray):
-                    results.append([player, (i, v)])
-        return results
+def reverse_matrix(matrix: list[list], h: bool = True) -> list[list[int]]:
+    """
+    (es): Invierte una matriz horizontal o verticalmente.\n
+    (en): Reverses a matrix horizontal or vertically.\n
 
-    l.extend(multiple_hcheck(matrix, player))
-    l.extend(multiple_hcheck(rotate_matrix(matrix), player))
+    Horizontal reversion:\n
+        [1,  1,  0] ------> [0,  1,  1]\n
+        [0,  1,  0] ------> [0,  1,  0]\n
+        [0,  1,  1] ------> [1,  1,  0]\n
 
-    return l
+    Vertical reversion:\n
+        [1,  0,  0] ------> [0,  0,  1]\n
+        [1,  1,  1] ------> [1,  1,  1]\n
+        [0,  0,  1] ------> [1,  0,  0]\n
+    """
+    r: list = []
+    if h:
+        for k in range(len(matrix)):
+            r.append([matrix[k][kk] for kk in range(len(matrix[k])-1, -1, -1)])
+    else:
+        r.append(matrix(k) for k in range(len(matrix)-1, -1, -1))
+        #for kk in range(len(matrix)-1, -1, -1):
+            #r.append(matrix[kk])
+    return r
+
+def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, int]:
+    """
+    (es): Invierte un indice de una matriz invertida horizontal o verticalmente para conseguir su equivalente en la matriz original.\n
+    (en): Reverses an index of a reversed matrix horizontal or vertically to get its equivalent index for the original matrix.\n
+
+    Horizontal reversion:\n
+                           Reversed -> Original\n
+        [0,  1,  0] ------> (0,0)   ->  (0,2)\n
+        [1,  0,  1] ------> (0,1)   ->  (0,1)\n
+        [0,  0,  1] ------> (0,2)   ->  (0,0)\n
+
+    Vertical reversion:\n
+                           Reversed -> Original\n
+        [0,  1,  0] ------> (0,0)   ->  (2,0)\n
+        [1,  0,  1] ------> (1,0)   ->  (1,0)\n
+        [0,  0,  1] ------> (2,0)   ->  (0,0)\n   
+    """
+    tmp: list = [inx[0], inx[1]] if h else [inx[1], inx[0]]
+    tmp[1] = [x for x in range(dpth-1, -1, -1)][tmp[1]]
+    return tmp if h else [tmp[1], tmp[0]]
 
     
 def check_win(matrix: list[list[int]], player: dict[str,]) -> list[list]: 
@@ -229,6 +313,91 @@ def check_win(matrix: list[list[int]], player: dict[str,]) -> list[list]:
     
     return wins
 
+"""
+FUNCIONES SOLO PARA LA LIBREIA Y NO PARA EL BOT:
+"""
+def sub_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk - vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk - vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def add_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk + vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk + vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def div_matrix(mtxs: list[list[list[int | float]]], nf: bool = True) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([kkk // vvv for kkk,vvv in zip(kk, vv)] if nf else [kkk / vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def mult_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk * vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk * vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def exp_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk ** vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk ** vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def modulus_matrix(mtxs: list[list[list[int | float]]]) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([kkk % vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def root_matrix(mtxs: list[list[list[int | float]]], nf: bool = True) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk ** (1/vvv)) for kkk,vvv in zip(kk, vv)] if nf else [kkk ** (1/vvv) for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+
+def isBiggest():
+    ...
+def getBiggest():
+    ...
+def isSmallest():
+    ...
+def getSmallest(mtxs: list[list[list]]) -> list[list]:
+    r: list = [0]
+    for k,v in enumerate(mtxs):
+        if r[0] < count_mtx(v):
+            r[1] = v if r[0] < count_mtx(v) else [r[1], v] if r[0] == count_mtx(v) else r[1]
+
+def count_mtx(mtx: list[list]) -> int:
+    n: int = 0
+    for v in mtx:
+        n += len(v) 
+    return n
+def transpose_matrix():
+    ...
+def randomize_mtx():
+    ...
+def extend_mtx():
+    ...
+def copy_mtx():
+    ...
+def fill_mtx():
+    ...
+def add_dimension():
+    ...
+def sub_dimension():
+    ...
+
+
+
+
+
+
 
 
 
@@ -244,11 +413,18 @@ if __name__ == "__main__":
 
         ],
         2: [
-            ['X', '0', '-', 'X', '0'],
-            ['-', '-', '-', 'X', 'X'],
-            ['X', '0', '-', 'X', '-'],
-            ['X', '0', '-', 'X', 'X'],
-            ['X', '0', '0', '-', '0']
+            ['0', '-', '0', '0', '0'],
+            ['-', '-', '-', '0', '0'],
+            ['0', '-', '-', '0', '0'],
+            ['0', '0', '-', '-', '-'],
+            ['X', 'X', 'X', 'X', 'X']
+        ],
+        5: [
+            ['0', '-', '0', '0', '0'],
+            ['-', '-', '-', '0', 'X'],
+            ['0', '-', '-', '0', 'X'],
+            ['0', '0', '-', '-', 'X'],
+            ['0', '0', '0', '0', '0']
         ],
         3: [
             [0,  1,   0, 0],
@@ -266,9 +442,17 @@ if __name__ == "__main__":
             ['X', '0', '0', 'X', 'X', '0', 'X', '0'],
             ['0', '0', 'X', 'X', '0', 'X', '-', 'X']
         ],
-}   
-
-    print(check_adjacent(transform2matrix(models[2]), 0))
+        6: [
+            [4, 1, 0],
+            [0, 2],
+            [1, 0, 2],
+        ],
+        7: [
+            [2, 3, 1],
+            [1, 2, 3],
+            [3, 1, 2],
+        ]
+} 
 
     """
     Vamos a ver, no puedo acabar el bot sin las siguientes funciones: 
