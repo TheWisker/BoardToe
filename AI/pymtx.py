@@ -3,6 +3,175 @@ from copy import deepcopy
 import numpy as np
 from dis import dis
 
+"""Main arithemtic functions"""
+def add_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk + vv for kk,vv in zip(k, v)] if f else [int(kk + vv) for kk,vv in zip(k, v)])
+    return r[0]
+
+def sub_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk - vv for kk,vv in zip(k, v)] if f else [int(kk - vv) for kk,vv in zip(k, v)])
+    return r[0]
+
+def mtp_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk * vv for kk,vv in zip(k, v)] if f else [int(kk * vv) for kk,vv in zip(k, v)])
+    return r[0]
+
+def div_mtx(mtxs: list[list[list[int | float]]], f: bool = False) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk / vv for kk,vv in zip(k, v)] if f else [int(kk // vv) for kk,vv in zip(k, v)])
+    return r[0]
+
+def exp_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk ** vv for kk,vv in zip(k, v)] if f else [int(kk ** vv) for kk,vv in zip(k, v)])
+    return r[0]
+
+def mod_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk % vv for kk,vv in zip(k, v)] if f else [int(kk % vv) for kk,vv in zip(k, v)])
+    return r[0]
+
+def xrt_mtx(mtxs: list[list[list[int | float]]], f: bool = False) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk ** (1/vv) for kk,vv in zip(k, v)] if f else [int(kk ** (1/vv)) for kk,vv in zip(k, v)])
+    return r[0]
+
+"""Main spatial functions"""
+def reverse_matrix(matrix: list[list], h: bool = True) -> list[list[int]]:
+    """
+    (es): Invierte una matriz horizontal o verticalmente.\n
+    (en): Reverses a matrix horizontal or vertically.\n
+
+    Horizontal reversion:\n
+        [1,  1,  0] ------> [0,  1,  1]\n
+        [0,  1,  0] ------> [0,  1,  0]\n
+        [0,  1,  1] ------> [1,  1,  0]\n
+
+    Vertical reversion:\n
+        [1,  0,  0] ------> [0,  0,  1]\n
+        [1,  1,  1] ------> [1,  1,  1]\n
+        [0,  0,  1] ------> [1,  0,  0]\n
+    """
+    r: list = []
+    if h:
+        for k in range(len(matrix)):
+            r.append([matrix[k][kk] for kk in range(len(matrix[k])-1, -1, -1)])
+    else:
+        r.append(matrix[k] for k in range(len(matrix)-1, -1, -1))
+    return r
+
+"""Main comparison functions"""
+def getBiggest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
+    r: list = [len_mtx(mtxs[0]), [mtxs[0]]]
+    for v in mtxs[1::]:
+        c: int = len_mtx(v)
+        r[1] = [v] if r[0] < c else r[1] + [v] if r[0] == c else r[1]
+        r[0] = c if r[0] < c else r[0]
+    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
+
+def getSmallest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
+    r: list = [len_mtx(mtxs[0]), [mtxs[0]]]
+    for v in mtxs[1::]:
+        c: int = len_mtx(v)
+        r[1] = [v] if r[0] > c else r[1] + [v] if r[0] == c else r[1]
+        r[0] = c if r[0] > c else r[0]
+    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
+
+def isBiggest(mtx: list[list], mtxs: list[list[list]]) -> bool:
+    return len_mtx(mtx) >= len_mtx(getBiggest(mtxs, False))
+
+def isSmallest(mtx: list[list], mtxs: list[list[list]]) -> bool:
+    return len_mtx(mtx) <= len_mtx(getSmallest(mtxs, False))
+
+"""Main util functions"""
+def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, int]:
+    """
+    (es): Invierte un indice de una matriz invertida horizontal o verticalmente para conseguir su equivalente en la matriz original.\n
+    (en): Reverses an index of a reversed matrix horizontal or vertically to get its equivalent index for the original matrix.\n
+
+    Horizontal reversion:\n
+                           Reversed -> Original\n
+        [0,  1,  0] ------> (0,0)   ->  (0,2)\n
+        [1,  0,  1] ------> (0,1)   ->  (0,1)\n
+        [0,  0,  1] ------> (0,2)   ->  (0,0)\n
+
+    Vertical reversion:\n
+                           Reversed -> Original\n
+        [0,  1,  0] ------> (0,0)   ->  (2,0)\n
+        [1,  0,  1] ------> (1,0)   ->  (1,0)\n
+        [0,  0,  1] ------> (2,0)   ->  (0,0)\n   
+    """
+    tmp: list = [inx[0], inx[1]] if h else [inx[1], inx[0]]
+    tmp[1] = [x for x in range(dpth-1, -1, -1)][tmp[1]]
+    return tmp if h else [tmp[1], tmp[0]]
+
+def len_mtx(mtx: list[list]) -> int:
+    n: int = 0
+    for v in mtx:
+        n += len(v) 
+    return n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def pretty_view(matrix: list[list[int]]) -> None:
     "Easy, rapid method to get a pretty view of the matrix"
@@ -271,51 +440,6 @@ def rotate_index(inx: list[int, int], depth: int, b: bool = True) -> list[int, i
     r[0] = depth-1-inx[1]
     return r if b else [r[1], r[0]]
 
-def reverse_matrix(matrix: list[list], h: bool = True) -> list[list[int]]:
-    """
-    (es): Invierte una matriz horizontal o verticalmente.\n
-    (en): Reverses a matrix horizontal or vertically.\n
-
-    Horizontal reversion:\n
-        [1,  1,  0] ------> [0,  1,  1]\n
-        [0,  1,  0] ------> [0,  1,  0]\n
-        [0,  1,  1] ------> [1,  1,  0]\n
-
-    Vertical reversion:\n
-        [1,  0,  0] ------> [0,  0,  1]\n
-        [1,  1,  1] ------> [1,  1,  1]\n
-        [0,  0,  1] ------> [1,  0,  0]\n
-    """
-    r: list = []
-    if h:
-        for k in range(len(matrix)):
-            r.append([matrix[k][kk] for kk in range(len(matrix[k])-1, -1, -1)])
-    else:
-        r.append(matrix(k) for k in range(len(matrix)-1, -1, -1))
-        #for kk in range(len(matrix)-1, -1, -1):
-            #r.append(matrix[kk])
-    return r
-
-def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, int]:
-    """
-    (es): Invierte un indice de una matriz invertida horizontal o verticalmente para conseguir su equivalente en la matriz original.\n
-    (en): Reverses an index of a reversed matrix horizontal or vertically to get its equivalent index for the original matrix.\n
-
-    Horizontal reversion:\n
-                           Reversed -> Original\n
-        [0,  1,  0] ------> (0,0)   ->  (0,2)\n
-        [1,  0,  1] ------> (0,1)   ->  (0,1)\n
-        [0,  0,  1] ------> (0,2)   ->  (0,0)\n
-
-    Vertical reversion:\n
-                           Reversed -> Original\n
-        [0,  1,  0] ------> (0,0)   ->  (2,0)\n
-        [1,  0,  1] ------> (1,0)   ->  (1,0)\n
-        [0,  0,  1] ------> (2,0)   ->  (0,0)\n   
-    """
-    tmp: list = [inx[0], inx[1]] if h else [inx[1], inx[0]]
-    tmp[1] = [x for x in range(dpth-1, -1, -1)][tmp[1]]
-    return tmp if h else [tmp[1], tmp[0]]
 
     
 
@@ -326,103 +450,33 @@ def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, i
     return r
 
 
-def add_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
-    r: list = [mtxs[0], []]
-    for mtx in mtxs[1:]:
-        r[1] = r[0]
-        r[0] = []
-        for k,v in zip(r[1], mtx):
-            r[0].append([kk + vv for kk,vv in zip(k, v)] if f else [int(kk + vv) for kk,vv in zip(k, v)])
-    return r[0]
-def sub_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
-    r: list = [mtxs[0], []]
-    for mtx in mtxs[1:]:
-        r[1] = r[0]
-        r[0] = []
-        for k,v in zip(r[1], mtx):
-            r[0].append([kk - vv for kk,vv in zip(k, v)] if f else [int(kk - vv) for kk,vv in zip(k, v)])
-    return r[0]
-
-def mtp_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
-    r: list = [mtxs[0], []]
-    for mtx in mtxs[1:]:
-        r[1] = r[0]
-        r[0] = []
-        for k,v in zip(r[1], mtx):
-            r[0].append([kk * vv for kk,vv in zip(k, v)] if f else [int(kk * vv) for kk,vv in zip(k, v)])
-    return r[0]
-def div_mtx(mtxs: list[list[list[int | float]]], f: bool = False) -> list[list[int | float]]:
-    r: list = [mtxs[0], []]
-    for mtx in mtxs[1:]:
-        r[1] = r[0]
-        r[0] = []
-        for k,v in zip(r[1], mtx):
-            r[0].append([kk / vv for kk,vv in zip(k, v)] if f else [int(kk // vv) for kk,vv in zip(k, v)])
-    return r[0]
-def exp_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
-    r: list = [mtxs[0], []]
-    for mtx in mtxs[1:]:
-        r[1] = r[0]
-        r[0] = []
-        for k,v in zip(r[1], mtx):
-            r[0].append([kk ** vv for kk,vv in zip(k, v)] if f else [int(kk ** vv) for kk,vv in zip(k, v)])
-    return r[0]
-def mod_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
-    r: list = [mtxs[0], []]
-    for mtx in mtxs[1:]:
-        r[1] = r[0]
-        r[0] = []
-        for k,v in zip(r[1], mtx):
-            r[0].append([kk % vv for kk,vv in zip(k, v)] if f else [int(kk % vv) for kk,vv in zip(k, v)])
-    return r[0]
-def xrt_mtx(mtxs: list[list[list[int | float]]], f: bool = False) -> list[list[int | float]]:
-    r: list = [mtxs[0], []]
-    for mtx in mtxs[1:]:
-        r[1] = r[0]
-        r[0] = []
-        for k,v in zip(r[1], mtx):
-            r[0].append([kk ** (1/vv) for kk,vv in zip(k, v)] if f else [int(kk ** (1/vv)) for kk,vv in zip(k, v)])
-    return r[0]
-
-def getBiggest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
-    r: list = [len_mtx(mtxs[0]), [mtxs[0]]]
-    for v in mtxs[1::]:
-        c: int = len_mtx(v)
-        r[1] = [v] if r[0] < c else r[1] + [v] if r[0] == c else r[1]
-        r[0] = c if r[0] < c else r[0]
-    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
-def getSmallest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
-    r: list = [len_mtx(mtxs[0]), [mtxs[0]]]
-    for v in mtxs[1::]:
-        c: int = len_mtx(v)
-        r[1] = [v] if r[0] > c else r[1] + [v] if r[0] == c else r[1]
-        r[0] = c if r[0] > c else r[0]
-    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
-
-def isBiggest(mtx: list[list], mtxs: list[list[list]]) -> bool:
-    return len_mtx(mtx) >= len_mtx(getBiggest(mtxs, False))
-def isSmallest(mtx: list[list], mtxs: list[list[list]]) -> bool:
-    return len_mtx(mtx) <= len_mtx(getSmallest(mtxs, False))
-
-def len_mtx(mtx: list[list]) -> int:
-    n: int = 0
-    for v in mtx:
-        n += len(v) 
-    return n
-
+#TO-DO
 def transpose_matrix():
     ...
 def randomize_mtx():
-    ...
-def extend_mtx():
-    ...
-def replace_mtx():
-    ...
-def copy_mtx():
-    ...
-def fill_mtx(mtxs: list[list[list]], fill = 0):
 
     ...
+def extend_mtx():
+
+    ...
+def replace_mtx(mtxs: list[list[list]], search: list = [], replace: list = [0]) -> list[list[list]]:
+    r: list = []
+    for mtx in mtxs:
+        rr: list = []
+        for v in mtx:
+            rrr: list = []
+            for vv in v:
+                rrr.append(vv if vv not in search and len(search) != 0 else replace[search.index(vv) if len(search) != 0 else 0])
+            rr.append(rrr)
+        r.append(rr)
+    return r
+
+def copy_mtx():
+    ...
+
+def fill_mtx(mtxs: list[list[list]], fill = 0) -> list[list[list]]:
+    return replace_mtx(mtxs, replace = [fill])
+    
 def add_dimension():
     ...
 def sub_dimension():
@@ -477,7 +531,7 @@ if __name__ == "__main__":
             [1, 0, 2],
         ],
         7: [
-            [4, 1, 0],
+            [5, 1, 0],
             [0, 2, 1],
             [1, 0, 2],
         ],
@@ -492,6 +546,6 @@ if __name__ == "__main__":
             [1, 0, 2],
         ]
 } 
-print(3.4 % 2.3)
+print(fill_mtx([models[6], models[7]]))
 #pretty_view(add_mtx([models[6], models[7], models[8], models[9]]))
 #print(isSmallest(models[6], [models[6], models[6], models[6]]))
