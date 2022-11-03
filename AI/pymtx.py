@@ -318,7 +318,7 @@ def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, i
     return tmp if h else [tmp[1], tmp[0]]
 
     
-def sub_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+
     r: list = []
     for k,v in enumerate(mtxs[1:]):
         for kk,vv in zip(mtxs[k], v):
@@ -326,81 +326,102 @@ def sub_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[li
     return r
 
 
-def add_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
-    r: list = []
-    for k,v in enumerate(mtxs[1:]):
-        for kk,vv in zip(mtxs[k], v):
-            r.append([int(kkk + vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk + vvv for kkk,vvv in zip(kk, vv)])
-    return r
+def add_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk + vv for kk,vv in zip(k, v)] if f else [int(kk + vv) for kk,vv in zip(k, v)])
+    return r[0]
+def sub_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk - vv for kk,vv in zip(k, v)] if f else [int(kk - vv) for kk,vv in zip(k, v)])
+    return r[0]
 
+def mtp_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk * vv for kk,vv in zip(k, v)] if f else [int(kk * vv) for kk,vv in zip(k, v)])
+    return r[0]
+def div_mtx(mtxs: list[list[list[int | float]]], f: bool = False) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk / vv for kk,vv in zip(k, v)] if f else [int(kk // vv) for kk,vv in zip(k, v)])
+    return r[0]
+def exp_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk ** vv for kk,vv in zip(k, v)] if f else [int(kk ** vv) for kk,vv in zip(k, v)])
+    return r[0]
+def mod_mtx(mtxs: list[list[list[int | float]]], f: bool = True) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk % vv for kk,vv in zip(k, v)] if f else [int(kk % vv) for kk,vv in zip(k, v)])
+    return r[0]
+def xrt_mtx(mtxs: list[list[list[int | float]]], f: bool = False) -> list[list[int | float]]:
+    r: list = [mtxs[0], []]
+    for mtx in mtxs[1:]:
+        r[1] = r[0]
+        r[0] = []
+        for k,v in zip(r[1], mtx):
+            r[0].append([kk ** (1/vv) for kk,vv in zip(k, v)] if f else [int(kk ** (1/vv)) for kk,vv in zip(k, v)])
+    return r[0]
 
-def div_matrix(mtxs: list[list[list[int | float]]], nf: bool = True) -> list[list[int | float]]:
-    r: list = []
-    for k,v in enumerate(mtxs[1::]):
-        for kk,vv in zip(mtxs[k], v):
-            r.append([kkk // vvv for kkk,vvv in zip(kk, vv)] if nf else [kkk / vvv for kkk,vvv in zip(kk, vv)])
-    return r
+def getBiggest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
+    r: list = [len_mtx(mtxs[0]), [mtxs[0]]]
+    for v in mtxs[1::]:
+        c: int = len_mtx(v)
+        r[1] = [v] if r[0] < c else r[1] + [v] if r[0] == c else r[1]
+        r[0] = c if r[0] < c else r[0]
+    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
+def getSmallest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
+    r: list = [len_mtx(mtxs[0]), [mtxs[0]]]
+    for v in mtxs[1::]:
+        c: int = len_mtx(v)
+        r[1] = [v] if r[0] > c else r[1] + [v] if r[0] == c else r[1]
+        r[0] = c if r[0] > c else r[0]
+    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
 
+def isBiggest(mtx: list[list], mtxs: list[list[list]]) -> bool:
+    return len_mtx(mtx) >= len_mtx(getBiggest(mtxs, False))
+def isSmallest(mtx: list[list], mtxs: list[list[list]]) -> bool:
+    return len_mtx(mtx) <= len_mtx(getSmallest(mtxs, False))
 
-def mult_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
-    r: list = []
-    for k,v in enumerate(mtxs[1::]):
-        for kk,vv in zip(mtxs[k], v):
-            r.append([int(kkk * vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk * vvv for kkk,vvv in zip(kk, vv)])
-    return r
-
-
-def exp_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
-    r: list = []
-    for k,v in enumerate(mtxs[1::]):
-        for kk,vv in zip(mtxs[k], v):
-            r.append([int(kkk ** vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk ** vvv for kkk,vvv in zip(kk, vv)])
-    return r
-
-
-def modulus_matrix(mtxs: list[list[list[int | float]]]) -> list[list[int | float]]:
-    r: list = []
-    for k,v in enumerate(mtxs[1::]):
-        for kk,vv in zip(mtxs[k], v):
-            r.append([kkk % vvv for kkk,vvv in zip(kk, vv)])
-    return r
-
-
-def root_matrix(mtxs: list[list[list[int | float]]], nf: bool = True) -> list[list[int | float]]:
-    r: list = []
-    for k,v in enumerate(mtxs[1::]):
-        for kk,vv in zip(mtxs[k], v):
-            r.append([int(kkk ** (1/vvv)) for kkk,vvv in zip(kk, vv)] if nf else [kkk ** (1/vvv) for kkk,vvv in zip(kk, vv)])
-    return r
-
-
-
-def isBiggest():
-    ...
-def getBiggest():
-    ...
-def isSmallest():
-    ...
-def getSmallest(mtxs: list[list[list]]) -> list[list]:
-    r: list = [0]
-    for k,v in enumerate(mtxs):
-        if r[0] < count_mtx(v):
-            r[1] = v if r[0] < count_mtx(v) else [r[1], v] if r[0] == count_mtx(v) else r[1]
-
-def count_mtx(mtx: list[list]) -> int:
+def len_mtx(mtx: list[list]) -> int:
     n: int = 0
     for v in mtx:
         n += len(v) 
     return n
+
 def transpose_matrix():
     ...
 def randomize_mtx():
     ...
 def extend_mtx():
     ...
+def replace_mtx():
+    ...
 def copy_mtx():
     ...
-def fill_mtx():
+def fill_mtx(mtxs: list[list[list]], fill = 0):
+
     ...
 def add_dimension():
     ...
@@ -452,12 +473,25 @@ if __name__ == "__main__":
         ],
         6: [
             [4, 1, 0],
-            [0, 2],
+            [0, 2, 1],
             [1, 0, 2],
         ],
         7: [
-            [2, 3, 1],
-            [1, 2, 3],
-            [3, 1, 2],
+            [4, 1, 0],
+            [0, 2, 1],
+            [1, 0, 2],
+        ],
+        8: [
+            [4, 1, 0],
+            [0, 2, 1],
+            [1, 0, 2],
+        ],
+        9: [
+            [4, 1, 0],
+            [0, 2, 1],
+            [1, 0, 2],
         ]
 } 
+print(3.4 % 2.3)
+#pretty_view(add_mtx([models[6], models[7], models[8], models[9]]))
+#print(isSmallest(models[6], [models[6], models[6], models[6]]))
