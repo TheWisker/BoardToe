@@ -313,6 +313,91 @@ def check_win(matrix: list[list[int]], player: dict[str,]) -> list[list]:
     
     return wins
 
+"""
+FUNCIONES SOLO PARA LA LIBREIA Y NO PARA EL BOT:
+"""
+def sub_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk - vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk - vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def add_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk + vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk + vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def div_matrix(mtxs: list[list[list[int | float]]], nf: bool = True) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([kkk // vvv for kkk,vvv in zip(kk, vv)] if nf else [kkk / vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def mult_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk * vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk * vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def exp_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk ** vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk ** vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def modulus_matrix(mtxs: list[list[list[int | float]]]) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([kkk % vvv for kkk,vvv in zip(kk, vv)])
+    return r
+def root_matrix(mtxs: list[list[list[int | float]]], nf: bool = True) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk ** (1/vvv)) for kkk,vvv in zip(kk, vv)] if nf else [kkk ** (1/vvv) for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+
+def isBiggest():
+    ...
+def getBiggest():
+    ...
+def isSmallest():
+    ...
+def getSmallest(mtxs: list[list[list]]) -> list[list]:
+    r: list = [0]
+    for k,v in enumerate(mtxs):
+        if r[0] < count_mtx(v):
+            r[1] = v if r[0] < count_mtx(v) else [r[1], v] if r[0] == count_mtx(v) else r[1]
+
+def count_mtx(mtx: list[list]) -> int:
+    n: int = 0
+    for v in mtx:
+        n += len(v) 
+    return n
+def transpose_matrix():
+    ...
+def randomize_mtx():
+    ...
+def extend_mtx():
+    ...
+def copy_mtx():
+    ...
+def fill_mtx():
+    ...
+def add_dimension():
+    ...
+def sub_dimension():
+    ...
+
+
+
+
+
+
 
 
 
@@ -357,10 +442,21 @@ if __name__ == "__main__":
             ['X', '0', '0', 'X', 'X', '0', 'X', '0'],
             ['0', '0', 'X', 'X', '0', 'X', '-', 'X']
         ],
+        6: [
+            [4, 1, 0],
+            [0, 2],
+            [1, 0, 2],
+        ],
+        7: [
+            [2, 3, 1],
+            [1, 2, 3],
+            [3, 1, 2],
+        ]
 }   
     
     #pretty_view(reverse_matrix(models[3]))
-    pretty_view(adjacent_check(transform2matrix(models[5]), 0))
+    #print(nui(models[6]))
+    pretty_view(getSmallest([models[6], models[7]]))
     #print(rotate_index([0,0], 3, True))
     #print(rotate_index([0,0], 3, False))
 
