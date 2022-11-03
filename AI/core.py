@@ -270,8 +270,6 @@ if __name__ == "__main__":
 
     print(check_adjacent(transform2matrix(models[2]), 0))
 
-
-
     """
     Vamos a ver, no puedo acabar el bot sin las siguientes funciones: 
         · check_win(player, table) Checkea si el jugador pasado de argumento (0 o 1) esta a un movimiento de ganar horizontal, vertical y diagonalmente.
