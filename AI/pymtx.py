@@ -317,6 +317,96 @@ def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, i
     tmp[1] = [x for x in range(dpth-1, -1, -1)][tmp[1]]
     return tmp if h else [tmp[1], tmp[0]]
 
+    
+def sub_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1:]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk - vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk - vvv for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+def add_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1:]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk + vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk + vvv for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+def div_matrix(mtxs: list[list[list[int | float]]], nf: bool = True) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([kkk // vvv for kkk,vvv in zip(kk, vv)] if nf else [kkk / vvv for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+def mult_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk * vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk * vvv for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+def exp_matrix(mtxs: list[list[list[int | float]]], nf: bool = False) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk ** vvv) for kkk,vvv in zip(kk, vv)] if nf else [kkk ** vvv for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+def modulus_matrix(mtxs: list[list[list[int | float]]]) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([kkk % vvv for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+def root_matrix(mtxs: list[list[list[int | float]]], nf: bool = True) -> list[list[int | float]]:
+    r: list = []
+    for k,v in enumerate(mtxs[1::]):
+        for kk,vv in zip(mtxs[k], v):
+            r.append([int(kkk ** (1/vvv)) for kkk,vvv in zip(kk, vv)] if nf else [kkk ** (1/vvv) for kkk,vvv in zip(kk, vv)])
+    return r
+
+
+
+def isBiggest():
+    ...
+def getBiggest():
+    ...
+def isSmallest():
+    ...
+def getSmallest(mtxs: list[list[list]]) -> list[list]:
+    r: list = [0]
+    for k,v in enumerate(mtxs):
+        if r[0] < count_mtx(v):
+            r[1] = v if r[0] < count_mtx(v) else [r[1], v] if r[0] == count_mtx(v) else r[1]
+
+def count_mtx(mtx: list[list]) -> int:
+    n: int = 0
+    for v in mtx:
+        n += len(v) 
+    return n
+def transpose_matrix():
+    ...
+def randomize_mtx():
+    ...
+def extend_mtx():
+    ...
+def copy_mtx():
+    ...
+def fill_mtx():
+    ...
+def add_dimension():
+    ...
+def sub_dimension():
+    ...
+
 
 
 if __name__ == "__main__":
@@ -371,19 +461,3 @@ if __name__ == "__main__":
             [3, 1, 2],
         ]
 } 
-
-    """
-    Vamos a ver, no puedo acabar el bot sin las siguientes funciones: 
-        · check_win(player, table) Checkea si el jugador pasado de argumento (0 o 1) esta a un movimiento de ganar horizontal, vertical y diagonalmente.
-        Devuelve una tupla o lista con todas las posiciones con las que dicho jugador puede ganar y si no hay la devuleve vacia.
-        Ej: return [(x,y), ...]
-        Para mayor comprobacion habria que devolver un booleano que especifique cuanda hay mas de dos posibles jugadas ganadoras si estan relacionadas, si es true es una victoria absoluta, si es false aun puedes perder.
-        Ej: return [(x,y), ...], bool_de_relacion
-        · check_adjacent(player) Checkea todas las posiciones en la tabla donde el jugador pasado de parametro pueda colocar una ficha adyacente a otra suya.
-        Devuelve una tupla o lista con todas las posiciones con las que dicho jugador puede poner adyacentes especificando para cada posicion cuantas fichas adyacentes suyas tiene, cuantas adyacentes eneigas tiene y cuantas vacias adyacentes tiene y si no hay la devuleve vacia.
-        Ej: return [((adyacentes_aliadas, adyacentes_enemigas, adyacentes_vacias), (x,y)),...]
-
-    Con estas dos simples funciones bastaria pero para mayor complejidad metele la siguiente funcion:
-        · check_prediction(player) Checkea el proximo movimiento del jugador pasado segun la propia forma del bot de calcular sus movimientos.
-        return AunNoSeQueDevuelve
-    """

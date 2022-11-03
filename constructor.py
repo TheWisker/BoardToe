@@ -23,6 +23,9 @@ class BoardGame:
     AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
     XCOLOR              = Fore.LIGHTRED_EX      #* static color for 'X' if player does not give any color
     OCOLOR              = Fore.LIGHTWHITE_EX    #* static color for '0' if player does not give any color
+    XTOKEN = "❌"
+
+
 
     def __init__(
         self, 
@@ -77,6 +80,10 @@ class BoardGame:
     @property
     def playing(self):
         return self._playing
+
+    @staticmethod
+    def is_bot(player):
+        return isinstance(player, Bot)
 
     @property 
     def available_colors(self) -> list[str]:
