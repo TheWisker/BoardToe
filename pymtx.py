@@ -16,7 +16,7 @@ __all__ = [
 
 #TODO ///////////////////////////////////////       ARITHMETIC FUNCTIONS        ////////////////////////////////////////////////
 
-def opmtx(mtxs: list[list[list[int | float]]], optype: str, dtype: Any = int):
+def opmtx(mtxs: list[list[list[int | float | str]]], optype: str, dtype: Any = int):
     """Convenience function that allows different operations with matrixs through a parameter in one function.
     
     - NOTE: You can type a optional/secret operation type ``osqrt`` to cause the first element to be raised to the power of 1 between the second index
@@ -37,10 +37,11 @@ def opmtx(mtxs: list[list[list[int | float]]], optype: str, dtype: Any = int):
         '>=': _operator.ge,
         '<=': _operator.le,
         '==': _operator.eq,
-        "||": _operator.abs,
+        "||": _operator.abs, #DA ERROR PORQUE LE PASAMOS DOS PARAMETROS, HAY QUE DIFERENCIAR ENTRE OPERACIONES CON UNO O DOS PARAMETROS
         "..": _operator.concat,
         '<<': _operator.lshift,
         '>>': _operator.rshift,
+        #'√'
         "osqrt": ...,    #kk ** (1/vv) -> onesqrt, instancing this to internal purposes
     }
 
@@ -510,7 +511,7 @@ if __name__ == "__main__":
             [1, 0, 2],
         ],
         7: [
-            [5, 1, 0],
+            [-5, 1, 0],
             [0, 2, 1],
             [1, 0, 2],
         ],
@@ -526,5 +527,5 @@ if __name__ == "__main__":
         ]
 } 
 #print(fill_mtx([models[6], models[7]]))
-print(opmtx([models[6], models[7]], "==", str))
+print(opmtx([models[6], models[7]], "||", str))
 #pretty_view(add_mtx([models[6], models[7], models[8], models[9]]))
