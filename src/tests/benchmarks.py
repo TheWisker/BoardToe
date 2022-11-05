@@ -1,6 +1,5 @@
 "Main file to benchmark the game performance and game algorithms"
 
-
 from timeit import Timer
 
 table = [

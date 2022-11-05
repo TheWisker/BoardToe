@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 def multiple_instcheck(vars: tuple, checks: tuple | None, manual_check: list = None, strict: bool = False) -> bool | list[bool, str]:
+     #! Hacer que el multiple_inscheck devuelva, en caso de strict=True, el valor que no cumple.
     """Function to simplicity the ``isinstance()`` checks.
     This function allow to check if n elements are instance of a type.
     

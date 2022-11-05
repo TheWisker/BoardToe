@@ -1,6 +1,6 @@
 from constants import *
-from langs import Langs
-from constructor import BoardGame, Fore, time, sleep
+from src.tests.langs import Langs
+from src.tests.constructor_two import BoardGame, Fore, time, sleep
 
 try:
     from pybeaut import *

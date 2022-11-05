@@ -1,7 +1,18 @@
-"""Main core module.
-EXCLUSIVE FOR MATRIX OPERATIONS
+"""Main pymtx module.
 
-Copyright present Backest-TheWisker 2022-2023
+# Pymtx: Miscellaneous & Specific operations for matrixes.
+
+- ``This module contains quite number of methods for specific operations
+and contexts to operate with matrixes.``
+
+### This module is divided in 3 sections:
+- 
+-
+-
+-
+
+
+#### Copyright present Backest-TheWisker 2022-2023
 """
 import operator as _operator
 import numpy as _np
@@ -48,7 +59,7 @@ def opmtx(mtxs: list[list[list[int | float]]], optype: str, dtype: Any = int):
     if not optype in ops.keys():
         raise TypeError("The operation type is not valid!!. Cannot operate with this operation type %s" % repr(dtype))
     elif dtype.__name__ not in [float.__name__, int.__name__, str.__name__]:
-        raise TypeError("Data type must a reprentable data type (str, int, float)")
+        raise TypeError("Data type must a representable data type (str, int, float)")
 
 
     operation = ops[optype]
@@ -64,7 +75,7 @@ def conctx(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[i
     return sumtx(mtxs, dtype)
 
 def sumtx(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[int | float]]:
-    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a reprentable data type (str, int, float)"
+    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a representable data type (str, int, float)"
     r: list = [mtxs[0], []]
     for mtx in mtxs[1:]:
         r[1], r[0] = r[0], []
@@ -73,7 +84,7 @@ def sumtx(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[in
     return r[0]
 
 def submtx(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[int | float]]:
-    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a reprentable data type (str, int, float)"
+    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a representable data type (str, int, float)"
     r: list = [mtxs[0], []]
     for mtx in mtxs[1:]:
         r[1], r[0] = r[0], []
@@ -82,7 +93,7 @@ def submtx(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[i
     return r[0]
 
 def mmtp(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[int | float]]:
-    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a reprentable data type (str, int, float)"
+    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a representable data type (str, int, float)"
     r: list = [mtxs[0], []]
     for mtx in mtxs[1:]:
         r[1], r[0] = r[0], []
@@ -91,7 +102,7 @@ def mmtp(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[int
     return r[0]
 
 def div_mtx(mtxs: list[list[list[int | float]]], dtype: Any = float) -> list[list[int | float]]:
-    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a reprentable data type (str, int, float)"
+    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a representable data type (str, int, float)"
     r: list = [mtxs[0], []]
     for mtx in mtxs[1:]:
         r[1], r[0] = r[0], []
@@ -100,7 +111,7 @@ def div_mtx(mtxs: list[list[list[int | float]]], dtype: Any = float) -> list[lis
     return r[0]
 
 def exp_mtx(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[int | float]]:
-    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a reprentable data type (str, int, float)"
+    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a representable data type (str, int, float)"
     r: list = [mtxs[0], []]
     for mtx in mtxs[1:]:
         r[1], r[0] = r[0], []
@@ -109,7 +120,7 @@ def exp_mtx(mtxs: list[list[list[int | float]]], dtype: Any = int) -> list[list[
     return r[0]
 
 def mod_mtx(mtxs: list[list[list[int | float]]], dtype: Any = float) -> list[list[int | float]]:
-    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a reprentable data type (str, int, float)"
+    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a representable data type (str, int, float)"
     r: list = [mtxs[0], []]
     for mtx in mtxs[1:]:
         r[1], r[0] = r[0], []
@@ -118,7 +129,7 @@ def mod_mtx(mtxs: list[list[list[int | float]]], dtype: Any = float) -> list[lis
     return r[0]
 
 def xrt_mtx(mtxs: list[list[list[int | float]]], dtype: Any = float) -> list[list[int | float]]:
-    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a reprentable data type (str, int, float)"
+    assert dtype.__name__ in [float.__name__, int.__name__, str.__name__], "Data type must a representable data type (str, int, float)"
     r: list = [mtxs[0], []]
     for mtx in mtxs[1:]:
         r[1], r[0] = r[0], []
@@ -153,67 +164,6 @@ def reverse_matrix(matrix: list[list], h: bool = True) -> list[list[int]]:
         r.append(matrix[k] for k in range(len(matrix)-1, -1, -1))
     return r
 
-# ! NO DEBERIAN ESTAR AQUI, CONSIDERAR CAMBIO DE NOMBRE Y QUE COÑO HACEN
-def replace_mtx(mtxs: list[list[list]], _search: list = [], _replace: list = [0]) -> list[list[list]]:
-    r: list = [[[] * v in mtx] for mtx in mtxs]
-    for mtx in mtxs:
-        rr: list = []
-        for v in mtx:
-            rrr: list = []
-            for vv in v:
-                rrr.append(vv if vv not in _search and len(_search) != 0 else _replace[_search.index(vv) if len(_search) != 0 else 0])
-            rr.append(rrr)
-        r.append(rr)
-    return r
-
-def fill_mtx(mtxs: list[list[list]], fill = 0) -> list[list[list]]:
-    return replace_mtx(mtxs, _replace = [fill])
-
-
-
-#TODO ///////////////////////////////////////       COMPARATION FUNCTIONS        ////////////////////////////////////////////////
-
-def get_biggest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
-    r: list = [msize(mtxs[0]), [mtxs[0]]]
-    for v in mtxs[1::]:
-        c: int = msize(v)
-        r[1] = [v] if r[0] < c else r[1] + [v] if r[0] == c else r[1]
-        r[0] = c if r[0] < c else r[0]
-    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
-
-def get_smallest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
-    r: list = [msize(mtxs[0]), [mtxs[0]]]
-    for v in mtxs[1::]:
-        c: int = msize(v)
-        r[1] = [v] if r[0] > c else r[1] + [v] if r[0] == c else r[1]
-        r[0] = c if r[0] > c else r[0]
-    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
-
-def is_biggest(mtx: list[list], mtxs: list[list[list]]) -> bool:
-    return msize(mtx) >= msize(get_biggest(mtxs, False))
-
-def is_smallest(mtx: list[list], mtxs: list[list[list]]) -> bool:
-    return msize(mtx) <= msize(get_smallest(mtxs, False))
-
-
-
-#TODO ///////////////////////////////////////       MISCELLANEOUS UTILS FUNCTIONS        ////////////////////////////////////////////////
-
-def msize(mtx: list[list]) -> int:
-    #! plantear recursion para evaluar todos los depth
-    n: int = 0
-    for v in mtx:
-        n += len(v) 
-    return n
-
-def pretty_view(matrix: list[list[int]]) -> None:
-    "Easy, rapid method to get a pretty view of the matrix"
-    print("-"*len(matrix)*4)
-    for i in matrix:
-        print(f"{i}")
-    print("-"*len(matrix)*4)
-    return
-
 def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, int]:
     """
     (es): Invierte un indice de una matriz invertida horizontal o verticalmente para conseguir su equivalente en la matriz original.\n
@@ -234,35 +184,6 @@ def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, i
     tmp: list = [inx[0], inx[1]] if h else [inx[1], inx[0]]
     tmp[1] = [x for x in range(dpth-1, -1, -1)][tmp[1]]
     return tmp if h else [tmp[1], tmp[0]]
-
-def transform2matrix(table: list[list[int]], reverse_method: bool = None) -> list:
-    """
-    ``Transforma una tabla bidimensional o superior con caracteres,
-    a una matriz de la misma profundidad con valores numericos o viceversa.``\n
-    - Para pasar de una matriz binaria a una de caracteres, poner como ``True`` el parametro ``reverse_method``
-    """
-    assert isinstance(table, list) and 3 <= len(table), f"Param @matrix must be a list and depth <= 3, no {type(table).__name__}"
-
-    if reverse_method is not None:
-        for i in range(len(table)):
-            for _ in range(len(table)):
-                if table[i][_] == -1:
-                    table[i][_] = "-"
-                elif table[i][_] == 0:
-                    table[i][_] = "0"
-                elif table[i][_] == 1:
-                    table[i][_] = "X"
-        return table
-        
-    for i in range(len(table)):
-        for _ in range(len(table)):
-            if table[i][_] == "-":
-                table[i][_] = -1
-            elif table[i][_] == "0":
-                table[i][_] = 0
-            elif table[i][_] == "X":
-                table[i][_] = 1
-    return table
 
 def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, numpymethod: bool = False, returnm: bool = True, ) -> list[list[int]] | None:
     """
@@ -311,6 +232,122 @@ def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, numpymethod: bool =
             matrix[i][N - j - 1] = temp
     
     return matrix if returnm else None
+
+def rotate_index(inx: list[int, int] | list[list[int, int]], depth: int, backwards: bool = True) -> list[int, int]:
+    """
+    NOTE: The method only accepts square methods for now
+
+    ## Parameters:
+
+        ``@index``: The index as [x, y]
+        ``@matrix_depth``: The matrix length, 
+        ``@backwards``: If it should rotate backwards (default forwards)
+    - Example:
+
+        rotate_index([0,0], 3, False) -> [0,2]
+    """
+    if isinstance(inx, (list, tuple)):
+        return [rotate_index(i) for i in inx]
+
+    r: list = [inx[0], inx[1]] if backwards else [inx[1], inx[0]]
+    r[1] = r[0]
+    r[0] = depth-1-inx[1]
+    return r if backwards else [r[1], r[0]]
+
+
+
+#TODO ///////////////////////////////////////       COMPARATION FUNCTIONS        ////////////////////////////////////////////////
+
+def get_biggest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
+    r: list = [msize(mtxs[0]), [mtxs[0]]]
+    for v in mtxs[1::]:
+        c: int = msize(v)
+        r[1] = [v] if r[0] < c else r[1] + [v] if r[0] == c else r[1]
+        r[0] = c if r[0] < c else r[0]
+    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
+
+def get_smallest(mtxs: list[list[list]], mtp: bool = True) -> list[list] | list[list[list]]:
+    r: list = [msize(mtxs[0]), [mtxs[0]]]
+    for v in mtxs[1::]:
+        c: int = msize(v)
+        r[1] = [v] if r[0] > c else r[1] + [v] if r[0] == c else r[1]
+        r[0] = c if r[0] > c else r[0]
+    return r[1] if len(r[1]) > 1 and mtp else r[1][0]
+
+def is_biggest(mtx: list[list], mtxs: list[list[list]]) -> bool:
+    return msize(mtx) >= msize(get_biggest(mtxs, False))
+
+def is_smallest(mtx: list[list], mtxs: list[list[list]]) -> bool:
+    return msize(mtx) <= msize(get_smallest(mtxs, False))
+
+
+
+#TODO ///////////////////////////////////////       MISCELLANEOUS UTILS FUNCTIONS        ////////////////////////////////////////////////
+
+def msize(mtx: list[list]) -> int:
+    #! plantear recursion para evaluar todos los depth
+    n: int = 0
+    for v in mtx:
+        n += len(v) # msize(v)
+    return n
+
+def replace_mtx(mtxs: list[list[list]], _search: list = [], _replace: list = [0]) -> list[list[list]]:
+    r: list = [[[] * v in mtx] for mtx in mtxs]
+    for mtx in mtxs:
+        rr: list = []
+        for v in mtx:
+            rrr: list = []
+            for vv in v:
+                rrr.append(vv if vv not in _search and len(_search) != 0 else _replace[_search.index(vv) if len(_search) != 0 else 0])
+            rr.append(rrr)
+        r.append(rr)
+    return r
+
+def fill_mtx(mtxs: list[list[list]], fill = 0) -> list[list[list]]:
+    return replace_mtx(mtxs, _replace = [fill])
+
+def pretty_view(matrix: list[list[int]]) -> None:
+    "Easy, rapid method to get a pretty view of the matrix"
+    print("-"*len(matrix)*4)
+    for i in matrix:
+        print(f"{i}")
+    print("-"*len(matrix)*4)
+    return
+
+def transform2matrix(table: list[list], reps: list[tuple] = [("❌", 1), ("⭕", 0), ("➖", -1)], reverse_method: bool = None) -> list:
+    """
+    ``Refactoriza una lista bimimensional o superior.``\n
+    - Para hacer el proceso contrario, poner como ``True`` el parametro ``reverse_method``
+
+    ## Parametros:
+
+    - ``@table``: La lista bimimensional o superior.
+    - ``@reps``: Lista conteniendo tuplas contiendo los valores antiguos a los valores nuevos.
+    """
+    assert isinstance(table, list) and 3 <= len(table), f"Param @matrix must be a list and depth <= 3, no {type(table).__name__}"
+
+    if reverse_method is not None:
+        for t in table:
+            for _ in range(len(table)):
+                for r in reps:
+                    if t[_] == r[1]:
+                        t[_] = r[0]
+                    elif t[_] == r[1]:
+                        t[_] = r[0]
+                    elif t[_] == r[1]:
+                        t[_] = r[0]
+        return table
+        
+    for t in table:
+        for _ in range(len(table)):
+            for r in reps:
+                if t[_] == r[0]:
+                    t[_] = r[1]
+                elif t[_] == r[0]:
+                    t[_] = r[1]
+                elif t[_] == r[0]:
+                    t[_] = r[1]
+    return table
 
 def hcheck(matrix: list[list[int]]) -> list[list[int | tuple[int, int]]] | list:
     """``Metodo general usado para comprobar si algun jugador esta a un movimiento de hacer una sucesion horizontal.``
@@ -421,27 +458,6 @@ def dgn_check(matrix: list[list[int]], n: int, rt: bool = False) -> tuple[int, l
                 r.append(reverse_index([k, k], len(matrix)) if rt else [k, k])
     return (dgn.count(-1), r)
 
-def rotate_index(inx: list[int, int] | list[list[int, int]], depth: int, backwards: bool = True) -> list[int, int]:
-    """
-    NOTE: The method only accepts square methods for now
-
-    ## Parameters:
-
-        ``@index``: The index as [x, y]
-        ``@matrix_depth``: The matrix length, 
-        ``@backwards``: If it should rotate backwards (default forwards)
-    - Example:
-
-        rotate_index([0,0], 3, False) -> [0,2]
-    """
-    if isinstance(inx, (list, tuple)):
-        return [rotate_index(i) for i in inx]
-
-    r: list = [inx[0], inx[1]] if backwards else [inx[1], inx[0]]
-    r[1] = r[0]
-    r[0] = depth-1-inx[1]
-    return r if backwards else [r[1], r[0]]
-
 
 
 #TODO ///////////////////////////////////////       TODO FUNCTIONS        ////////////////////////////////////////////////
@@ -527,4 +543,5 @@ if __name__ == "__main__":
 } 
 #print(fill_mtx([models[6], models[7]]))
 print(opmtx([models[6], models[7]], "==", str))
+dis(opmtx)
 #pretty_view(add_mtx([models[6], models[7], models[8], models[9]]))

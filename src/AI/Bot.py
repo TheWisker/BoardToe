@@ -1,15 +1,39 @@
 from random import randint
-from constructor_two import Player
+from src.Player import Player
+import src.core as core
 
-import core as core
-
-#Class intantiated on game start as a player, accepts a parameter the bot player number, and the enemy player number, each turn the get_move function should be called to get the move that this bot plays
 class Bot(Player):
+    """
+    Class intantiated on game start as a player, 
+    accepts a parameter the bot player number, and the enemy player number, 
+    each turn the get_move function should be called to get the move that this bot plays.
+    """
 
     def __init__(self, players: tuple[int, int], difficulty: str = "Easy") -> None:
         self.bot = players[0]
         self.plr = players[1]
+
         ...
+
+    def turn(matrix: list[list[int]], player: int, lang: str):
+        matrix = core.transform2matrix(matrix)
+
+        pmoves: list[tuple[int, tuple[int, int]]] = core.adjacent_check(matrix, 0 if player else 1)
+        bmoves: list[tuple[int, tuple[int, int]]] = core.adjacent_check(matrix, player)
+        pmove: tuple[int, tuple[int, int]] = ...
+        bmove: tuple[int, tuple[int, int]] = ...
+        
+
+        ...
+        # super().take_turn() to access to the base class method
+
+    def _filter_moves(moves: list[tuple[int, tuple[int, int]]]) -> list[int, tuple[int, int]] | list[int, list[tuple[int, int]]]:   #! TYPE HINTS
+
+        r: list = [moves[0][0], moves[0]]
+        for v in moves[1:]:
+            r[1] = [v[1]] if r[0] > v[0][0] else r[1] + [v[1]] if r[0] == v[0][0] else r[1]
+            r[0] = v[0][0] if r[0] > v[0][0] else r[0]
+        return r
         
 
     def _get_cases(board: list[list[int]], player: int) -> list[tuple[int, int]]:
@@ -80,3 +104,26 @@ class Bot(Player):
 
     # def _add_cache(): #add cache to better process the current match and options
     #     ...
+    models: dict[str, str] = {
+        6: [
+            [4, 1, 0],
+            [0, -1, 1],
+            [1, 0, 2],
+        ],
+        7: [
+            [5, 1, 0],
+            [0, 2, 1],
+            [1, 0, 2],
+        ],
+        8: [
+            [4, 1, 0],
+            [0, 2, 1],
+            [1, 0, 2],
+        ],
+        9: [
+            [4, 1, 0],
+            [0, 2, 1],
+            [1, 0, 2],
+        ]
+    } 
+    print(_filter_moves(models[6], 1))
