@@ -1,7 +1,8 @@
 from utils import *
 from langs import Langs
+from AI.Bot import Bot
+from Player import Player
 import core
-
 
 from random import choice, randint
 from time import time, sleep
@@ -10,34 +11,34 @@ from collections import namedtuple
 from os import get_terminal_size
 from threading import Thread
 
+from pybeaut import Col as _Col
 from colorama import Fore
+
+
 
 
 
 class BoardGame:
 
-    _movtuple      = namedtuple("Movement", ["token", "player_name", "position", "moviment_time"])
-    _ptycachetuple = namedtuple("PartyCache", ["dictmap"])
+    _movtuple           = namedtuple("Movement", ["token", "player_name", "position", "moviment_time"])
+    _ptycachetuple      = namedtuple("PartyCache", ["partymapping"])
 
     AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
     XCOLOR              = Fore.LIGHTRED_EX      #* static color for 'X' if player does not give any color
     OCOLOR              = Fore.LIGHTWHITE_EX    #* static color for '0' if player does not give any color
-    XTOKEN = "❌"
-
-
+    XTOKEN              = "❌"
+    OTOKEN              = "⭕"
 
     def __init__(
         self, 
         _rows: int, 
         _columns: int, 
-        tokenplayer1: str, 
-        tokenplayer2: str, 
-        player1: str = "player1", 
-        player2: str = "player2", 
-        pl1color: str = None,
-        pl2color: str = None,
+        player1: Player,
+        player2: Player,
+        game_mode: int = 1,
         game_lang: str = "SPANISH",
-        game_mode: int = 1
+        _show_stats: bool = True
+        
     ):
         
         if not multiple_instcheck((_rows, _columns), int):
@@ -46,35 +47,29 @@ class BoardGame:
         elif _rows != _columns or not 9 <= _rows * _columns <= 64:   #3x3 - 8x8 -> Min & max board range
             raise ValueError("The number of rows and columns must be equals or the table size is minor than 3x3 or mayor than 8x8 (Max table size of 8x8)")
         
-        elif not multiple_instcheck((player1, player2), str):
-            raise ValueError("Player attribute must be a string saying the name of the player")
-        elif not multiple_instcheck((tokenplayer1, tokenplayer2), str) or tokenplayer1 == tokenplayer2:
-            raise TypeError("Token player must be X or O and each player must define a different token")
+        elif not game_lang in Langs.langs_supported():
+            ...
         
-        elif not (
-            multiple_instcheck((player1, player2), str) or
-            pl1color is not None and not pl1color.upper() in self.AVARIABLE_COLORS or 
-            pl2color is not None and not pl2color.upper() in self.AVARIABLE_COLORS or 
-            (pl1color.upper() == "RESET" or pl2color.upper() == "RESET")
-        ):    
-            raise ValueError(f"The player color must be in those list of colors: {[c.capitalize() for c in self.AVARIABLE_COLORS]}")
+        self.debuginfo = self.stats = self._ptycachetuple(self._party_cache)
 
-        
-        self.rows           = _rows
-        self.columns        = _columns
-        self.game_lang      = game_lang
-        self.game_mode      = game_mode 
+        self.rows               = _rows
+        self.columns            = _columns
+        self.board              = None       #? para evitar crearla antes de comenzar el juego, se crea cuando se llama a init_game()
+
+        self.game_lang          = game_lang
+        self.game_mode          = game_mode 
+        self._playing           = False
     
+        self._party_cache       = self._make_party_cache()
+        self._game_cache        = []
 
-        self.player1        = self._make_player_cache(player1, tokenplayer1, pl1color if pl1color is not None else self.OCOLOR if tokenplayer1 == "0" else self.XCOLOR)
-        self.player2        = self._make_player_cache(player2, tokenplayer2, pl2color if pl2color is not None else self.OCOLOR if tokenplayer2 == "0" else self.XCOLOR)
-        self.board          = self._make_board()
-        self._playing       = False
-        
-        self._party_cache   = self._make_party_cache()
-        self._game_cache = []
-        self.debuginfo      = self._ptycachetuple(self._party_cache)
+        self.player1: Player    = player1
+        self.player2: Player    = player2
 
+        if self.player1.name == "Player":
+            self.player1._name = "Player1"
+        if self.player2.name == "Player":
+            self.player2._name = "Player2"
 
     @property
     def playing(self):
@@ -84,10 +79,10 @@ class BoardGame:
     def available_colors(self) -> list[str]:
         return self.AVAILABLE_COLORS
 
+
     def _make_party_cache(self) -> dict[str,]:
         "Makes a party cache."
-
-        party_cache = {
+        return {
             "board_size": (self.rows, self.columns), 
             "players": (self.player1, self.player2), 
             "party": {
@@ -96,37 +91,18 @@ class BoardGame:
                 "movements": []
             }
         }
-        return party_cache
-        
-        
-    def _make_player_cache(self, player, token, color) -> dict[str,]:
-        "Makes a player cache."
 
-        cache = {
-            "name": player,
-            "token": token.strip().upper(),
-            "color": color,
-            "movements": [],    #? Aqui solo se guarda la posicion del movimiento.
-            "timings": [],
-            "best_timing": None,
-            "worst_timing": None
-        }
-        return cache
 
     def _clear_caches(self) -> None:
         "Limpia la cache."
-
-        player1n, tknpl1, colorpl1 = self.player1["name"], self.player1["token"], self.player1["color"]
-        player2n, tknpl2, colorpl2 = self.player2["name"], self.player2["token"], self.player2["color"]
-
-        self.player1        = self._make_player_cache(player1n, tknpl1, colorpl1)
-        self.player2        = self._make_player_cache(player2n, tknpl2, colorpl2)
+        self.player1._clear_cache()
+        self.player2._clear_cache()
         self._party_cache   = self._make_party_cache()
-        return
 
 
     def _make_board(self) -> list:
         """``Metodo privado para crear una tabla vacia.``
+
         - Metodo mejorado para creacion de matrices vacias.
     
             Antes:
@@ -144,11 +120,12 @@ class BoardGame:
 
 
     def _save_win_to_cache(self, method: str):
-        self._party_cache["party"]["win"] = {"method": method,}
-        self._party_cache["party"]["win"]["player_name"] = self._party_cache ["party"]["movements"][-1][1]  
+        self._party_cache["party"]["win"] = {"method": method}
+        self._party_cache["party"]["win"]["player_name"] = self._party_cache["party"]["movements"][-1][1]  
         #? 1 es el indice del nombre del jugador dentro de la namedtuple de Movimient
 
 
+    #! RETOCAR LA FUNCION
     def _pprint(self, table) -> None:
         "Prints the table in a pretty way (without colons and token-colored)"
 
@@ -159,15 +136,18 @@ class BoardGame:
                     (
                         ("'", ""), 
                         (",", "  "), 
-                        ("[", f"{Fore.LIGHTBLUE_EX}|{Fore.RESET} "),
-                        ("]", f" {Fore.LIGHTBLUE_EX}|{Fore.RESET}"),
-                        ("0", f"{self.OCOLOR}0{Fore.RESET}"), 
-                        ("X", f"{self.XCOLOR}X{Fore.RESET}")
+                        ("[", f"{Fore.LIGHTBLUE_EX}║{Fore.RESET} "),
+                        ("]", f" {Fore.LIGHTBLUE_EX} ║{Fore.RESET}"),
+                        ("⭕", f"{self.OCOLOR}⭕{Fore.RESET}"), 
+                        ("❌", f"{self.XCOLOR}❌{Fore.RESET}")
                     )
                 )
             )
         print("\n")     # white line to stylize
 
+
+    def show_stats(self) -> str | dict[str,]:
+        print(self.stats)
 
 
     #! PUBLIC METHODS   ----------------------------------------------------------------
@@ -175,15 +155,8 @@ class BoardGame:
     def turn(self) -> tuple[int, int]:
         "Fuction to manage the turns"
         
-        player_color = self.actual_turn["color"]
-
-        self.turn_time = datetime.now()
-        posx = input(f"{player_color}[{self.actual_turn['name']}]{Fore.RESET}: {Fore.LIGHTWHITE_EX}{Langs.get_phrase(self.game_lang, 'game', 3).format('X')} -> {Fore.RESET}") 
-        #Coloca la coordenada {}
-        posy = input(f"{player_color}[{self.actual_turn['name']}]{Fore.RESET}: {Fore.LIGHTWHITE_EX}{Langs.get_phrase(self.game_lang, 'game', 3).format('Y')} -> {Fore.RESET}") 
-        #Coloca la coordenada {}
-        self.turn_time = round((datetime.now()-self.turn_time).total_seconds(), 2)
         try:
+            posx, posy = self.actual_turn.take_turn()[1]
             posx = int(posx)
             posy = int(posy)
         except:
@@ -193,11 +166,12 @@ class BoardGame:
         if (not 1 <= posx <= self.rows) or (not 1 <= posy <= self.columns) or (not 1 <= posx <= self.rows and not 1 <= posy <= self.columns):
             print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 1).format(self.rows)}{Fore.RESET}") #Las coordenadas deben estar entre 1 y {}
             return self.turn()
-        
+
+        self.turn_time = self.actual_turn.take_turn[0]     #? Si el turno es valido, entonces se guarda el tiempo, no antes.
         return posx, posy
         
 
-    def draw_board(self, table, pos: tuple[int, int], player) -> None:
+    def draw_board(self, table, pos: tuple[int, int], player: Player) -> None:
         """# Importante:
             @param ``pos`` es una tupla que describe las coordenadas ``X`` e ``Y``, el orden es sumamente importante.\n
             Las coordenadas deben estar entre ``[1, board_columns] ∈ x``  --- ``[1, board_rows] ∈ y``
@@ -212,48 +186,47 @@ class BoardGame:
             posx, posy = self.turn()
             return self.draw_board(table, (posx, posy), player)
             
-                  
-        elif table[posx][posy] == player["token"]:
+        elif table[posx][posy] == player.token:
             #? la posicion esta ocupada por una ficha del mismo tipo
             print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 3)}{Fore.RESET}") #¡Ya has puesto una ficha en esta posicion!
             posx, posy = self.turn()
             return self.draw_board(table, (posx, posy), player)
 
         else:
-            table[posx][posy] = player["token"]
+            table[posx][posy] = player.token
             
             #? Guarda el movimiento del jugador en su cache. SOLO LAS COORDENADAS
-            player["movements"].append((posx, posy))
-            player["timings"].append(self.turn_time)
-
-            self._party_cache["party"]["movements"].append(self._movtuple(player["token"], player["name"], pos, self.turn_time))
+            player.addmov(pos, self.turn_time)      #? tambien añade el tiempo
+            self._party_cache["party"]["movements"].append(self._movtuple(player.token, player.name, pos, self.turn_time))
             
-            _last_turn_index = self._party_cache["players"].index(self.actual_turn) #? len de la lista de jugadores (siempre 1)
+            _last_turn_index = self._party_cache["players"].index(self.actual_turn)
             self.actual_turn = self._party_cache["players"][_last_turn_index-1]   
             #* para obtener el otro jugador se busca el indice del jugador y se le resta 1.
             return    
 
-
     def checkWin(self) -> bool:
         """
-        Metodo que alberga 4 metodos independientes:
-        - Horizontal
-        - Vertical 
-        - Diagonal en tablas par
-        - Diagonal en tablas impar
-        
-        
-        #### Metodo horizontal
-        ``Si todos los elementos de una sublista de la matriz son iguales, ha ganado.``
-        #### Metodo vertical:
-        ``Hace un range de la longitud de la matriz con la variable i.    
-        Si el elemento i de la ultima subarray no es igual al de la primera o el elemento i de
-        la primera subarray es "-" se salta a la siguiente iteracion (i+1).``\n
-        ``Si los elementos de los extremos son iguales, se hace un range de la matriz de nuevo menos los extremos y se guardan los valores de la sublista[_][i] en
-        otra lista checks.
-        Si todos los elementos de la lista checks son iguales, ha ganado un jugador.
-        Si no son iguales se continua iterando.``
+            Metodo que alberga 4 metodos independientes:
+            - Horizontal
+            - Vertical 
+            - Diagonal en tablas par
+            - Diagonal en tablas impar
+            
+            #### Metodo horizontal:
+            ``Si todos los elementos de una sublista de la matriz son iguales, ha ganado.``
+
+            #### Metodo vertical:
+
+            ``Hace un range de la longitud de la matriz con la variable i.    
+            Si el elemento i de la ultima subarray no es igual al de la primera o el elemento i de
+            la primera subarray es "-" se salta a la siguiente iteracion (i+1).``\n
+            ``Si los elementos de los extremos son iguales, se hace un range de la matriz de nuevo menos los extremos y se guardan los valores de la sublista[_][i] en
+            otra lista checks.
+            Si todos los elementos de la lista checks son iguales, ha ganado un jugador.
+            Si no son iguales se continua iterando.``
         """
+
+        bmatrix = core.transform2matrix(self.board) #? la transformamos a binarios
 
         for subarrays in self.board:
             if subarrays[0] == "-":
@@ -261,7 +234,7 @@ class BoardGame:
             if all(elem == subarrays[0] for elem in subarrays):
                 self._save_win_to_cache("Horizontal")
                 return True
-        
+
 
         for i in range(len(self.board)):
             if (self.board[0][i] == "-" or self.board[-1][i] == "-") or (self.board[-1][i] != self.board[0][i]):
@@ -272,10 +245,9 @@ class BoardGame:
                 return True
 
 
-        #! Metodo diagonal con impares
         if len(self.board) % 2 != 0: 
             token = self.board[(len(self.board)//2)][(len(self.board)//2)]  #? centro de la matriz
-        
+
             if token == "-":    #* si el centro de la matriz no es X o 0, no hay ninguna diagonal
                 return False
 
@@ -295,7 +267,6 @@ class BoardGame:
                         self._save_win_to_cache("Upwards diagonal")
                         return True
 
-        #! Metodo diagonal con impares
         else:
             if self.board[0][0] == "-" or self.board[0][-1] == "-":     #* Si alguna de las esquinas de las diagonales posibles esta vacia, no hay diagonales.
                 return False
@@ -327,7 +298,7 @@ class BoardGame:
 
 
     def checkDraw(self) -> bool:
-
+        "Verifica si ha habido un empate. Por ahora solo verifica que ha habido un empate cuando en la tabla no hay mas posiciones libres y nadie a ganado"
         empty_locs = 0
 
         for i in range(len(self.board)):
@@ -340,26 +311,23 @@ class BoardGame:
         for i,s in zip(range(len(self.board)), range(0, len(self.board), -1)):
             if self.board[i][s] == "-":
                 empty_locs += 1
-        print(empty_locs)
 
-        
         return False
                 
         
-    def init_game(self):
+    def init_game(self) -> str | None:
         "Game loop flow, unless you cancel the game or one player win, the game will be cancelled"
 
-        self._clear_caches()     #* vacia la cache para iniciar una nueva partida, aunque ya se haya limpiado antes.
-        self.partycounter        = datetime.now()       
-        self._playing            = True
-        self.actual_turn         = None
-        
-        def choice_start() -> None:
-            self.actual_turn = choice(self._party_cache["players"])
+        self._clear_caches()     #* vacia la cache para iniciar una nueva partida, aunque ya se haya limpiado antes.  
 
-        choice_start()
+        self.board: list[list]          = self._make_board()
+        self._playing: bool             = True
+        self.actual_turn: Player        = choice(self._party_cache["players"])
+
         try:
             while self._playing:
+                self.partycounter  = datetime.now()
+
                 self._pprint(self.board)
                 posx, posy = self.turn()
                 self.draw_board(self.board, (posx, posy), self.actual_turn)
@@ -370,7 +338,7 @@ class BoardGame:
                     print(f"{Langs.get_phrase(self.game_lang, 'game', 2).format(self._party_cache['party']['win']['player_name'].upper())}") #¡{} ha ganado!
                     break
 
-                if self.checkDraw():
+                elif self.checkDraw():
                     self.partycounter = round((datetime.now()-self.partycounter).total_seconds())
                     self._pprint(self.board)      
                     print(f"EMPATE!!")
@@ -382,41 +350,20 @@ class BoardGame:
             print(f"\n{Fore.LIGHTYELLOW_EX}[GAME LOOP STOPED] -> {Langs.get_phrase(self.game_lang, 'runtime', 0)}{Fore.RESET}") #Se ha finalizado el juego forzosamente.
             exit()
 
-        self.player1["best_timing"]     = min(self.player1["timings"])
-        self.player1["worst_timing"]    = max(self.player1["timings"])
-        self.player2["best_timing"]     = min(self.player2["timings"])
-        self.player2["worst_timing"]    = max(self.player2["timings"])
+        self.player1.cache["best_timing"]     = min(self.player1["timings"])
+        self.player1.cache["worst_timing"]    = max(self.player1["timings"])
+        self.player2.cache["best_timing"]     = min(self.player2["timings"])
+        self.player2.cache["worst_timing"]    = max(self.player2["timings"])
 
         self._party_cache["party"]["total_time"] = self.partycounter
         self._game_cache.append(self._party_cache)
         self._playing = False
-    
-        print(self._party_cache)
 
         self._clear_caches()
+
+        self.show_stats()
+
         
-
-
-
+        
 if __name__ == "__main__":
-    er = [
-        ['', '', '0'],
-        ['', '0', ''],
-        ['0', '', '']
-    ]
-
-    er2 = [
-        ['', '', '', '0'],
-        ['', '', '0', ''],
-        ['', '0', '', ''],
-        ['0', '', '', '']
-    ]
-
-    er3 = [
-        ['X', '', '', '', '', '0'],
-        ['', 'X', '', '', '0', ''],
-        ['', '', '', '0', '', ''],
-        ['', '', '', 'X', '', ''],
-        ['', '0', '', '', 'X', ''],
-        ['0', '', '', '', '', 'X'],
-    ]
+    ...

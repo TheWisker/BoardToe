@@ -27,7 +27,7 @@ def pretty_view(matrix: list[list[int]]) -> None:
     """
 
 
-def transform2matrix(table: list[list[int]], reverse_method: bool = None) -> list:
+def transform2matrix(table: list[list], reps: list[tuple] = [("❌", 1), ("⭕", 0), ("➖", -1)], reverse_method: bool = None) -> list:
     """
     ``Transforma una tabla bidimensional o superior con caracteres,
     a una matriz de la misma profundidad con valores numericos o viceversa.``\n
@@ -36,26 +36,34 @@ def transform2matrix(table: list[list[int]], reverse_method: bool = None) -> lis
     assert isinstance(table, list) and 3 <= len(table), f"Param @matrix must be a list and depth <= 3, no {type(table).__name__}"
 
     if reverse_method is not None:
-        for i in range(len(table)):
+        for i,t in enumerate(table):
             for _ in range(len(table)):
-                if table[i][_] == -1:
-                    table[i][_] = "-"
-                elif table[i][_] == 0:
-                    table[i][_] = "0"
-                elif table[i][_] == 1:
-                    table[i][_] = "X"
+                for r in reps:
+                    if t[_] == r[1]:
+                        t[_] = r[0]
+                    elif t[_] == r[1]:
+                        t[_] = r[0]
+                    elif t[_] == r[1]:
+                        t[_] = r[0]
         return table
         
-    for i in range(len(table)):
+    for t in table:
         for _ in range(len(table)):
-            if table[i][_] == "-":
-                table[i][_] = -1
-            elif table[i][_] == "0":
-                table[i][_] = 0
-            elif table[i][_] == "X":
-                table[i][_] = 1
+            for r in reps:
+                if t[_] == r[0]:
+                    t[_] = r[1]
+                elif t[_] == r[0]:
+                    t[_] = r[1]
+                elif t[_] == r[0]:
+                    t[_] = r[1]
     return table
 
+er = [  
+    ['❌', '➖', '❌'],
+    ['⭕', '➖', '❌'],
+    ['❌','❌','⭕'],
+]
+print(transform2matrix(er))
 
 def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, numpymethod: bool = False, returnm: bool = True, ) -> list[list[int]] | None:
     """

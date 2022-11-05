@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-def multiple_instcheck(vars: tuple, checks: tuple | None, manual_check: list = None):
+def multiple_instcheck(vars: tuple, checks: tuple | None, manual_check: list = None, strict: bool = False) -> bool | list[bool, str]:
     """Function to simplicity the ``isinstance()`` checks.
     This function allow to check if n elements are instance of a type.
     
@@ -27,8 +27,14 @@ def multiple_instcheck(vars: tuple, checks: tuple | None, manual_check: list = N
     else:
         return all(isinstance(e, checks) for e in vars)
 
-def getKey(rawDict: dict, value):
+def getKey(rawDict: dict, value, strict: bool = True) -> None | Exception:
+    """Get a dictionary item through the key. 
+    - If ``strict`` param is give (by deafult) an exception will be raised
+    """
     if isinstance(rawDict, dict):
+        if not value in list(rawDict.values()) and strict:
+            raise ValueError(f"{repr(value)} is not in dictionary values (not in first layer)")  
+
         for k, v in rawDict.items():
             if v == value:
                 return k
@@ -42,7 +48,6 @@ def multiple_replace(rawstr: str, reml: tuple[tuple[str, str]], count: int = -1)
     for i in reml:
         rawstr = rawstr.replace(i[0], i[1], count)
     return rawstr
-
 
 def cls():
     from os import system, name

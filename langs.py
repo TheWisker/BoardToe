@@ -55,10 +55,6 @@ class Langs:
             raise ValueError(f"This language is not set!!. Available langs: {Langs.langs_supported}")
         return Langs.langs[lang.upper()][level][index]
     
-    
-
-
-            
 
         
     
