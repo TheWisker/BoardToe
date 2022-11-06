@@ -242,7 +242,7 @@ def dcheck(matrix: list[tuple[int]]) -> list[list[int | tuple[int, int]]] | list
 
 def adjacent_check(matrix: list[list[int]], n: int) -> list[tuple[int, tuple[int]]]: #[(player, (x,y))]
     "Function that returns a list with the adjacent positions to each player"
-    return [_ for _ in row_check(matrix, n)].extend(row_check(rotate_matrix(matrix), n, True)).extend(cross_check(matrix, n))
+    return corner_check(matrix, n) + cross_check(matrix, n)
 
 def corner_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[int, int]]]]:
     return row_check(matrix, n) + row_check(rotate_matrix(matrix), n, True)
