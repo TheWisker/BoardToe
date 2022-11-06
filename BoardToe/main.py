@@ -1,6 +1,7 @@
 from constants import *
-from src.tests.langs import Langs
-from src.tests.constructor_two import BoardGame, Fore, time, sleep
+from langs import Langs
+from constructor import BoardGame, Fore, time, sleep
+from Player import Player, _Col
 
 try:
     from pybeaut import *
@@ -23,9 +24,10 @@ def display_options(field_opts: list[list[str]], fields_names: list[str] = None,
 
 display_options(["Human vs Human", "Human vs CPU", "CPU vs CPU"])
 
-lang = input(f"{Langs.get_phrase('SPANISH', 'game', 0)} -> ") #¿En que idioma desea jugar?
-
-test = BoardGame(5,5, "0", "X", game_lang=lang) 
+# lang = input(f"{Langs.get_phrase('SPANISH', 'game', 0)} -> ") #¿En que idioma desea jugar?
+player1 = Player("⭕", "Alvaritow", "red")
+player2 = Player("❌", "Fanico", "blue")
+test = BoardGame(5,5, player1, player2, game_lang="SPANISH") 
 
 test._clear_caches()
 test.init_game()

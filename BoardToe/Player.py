@@ -7,8 +7,8 @@ For more detailed info about the class open a terminal al type 'python -i Player
 NOTE: This class can be subclassed,
 and may u want to do this to make other player object neither with special methods nor overriding any Player method.
 """
-from src.langs import Langs
-from src.utils import *
+from langs import Langs
+from utils import *
 
 from datetime import datetime
 from typing import MutableMapping
@@ -24,6 +24,7 @@ class Player(object):
     """Main player class with cache implementation."""
     # __slots__ = ("token", "name", "color", "cache")
     __fmts: dict = _Col.static_cols_mapping
+    # AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
 
     def __init__(
         self,
@@ -55,7 +56,7 @@ class Player(object):
     @property
     def name(self) -> str:
         "Return the name of the player in a read-only view ``(property)``"
-        return self.name
+        return self._name
     @property
     def color(self) -> _Col | str:
         "Return the color of the player in a read-only view ``(property)``"
@@ -63,7 +64,7 @@ class Player(object):
     @property
     def token(self) -> str:
         "Return the token of the player in a read-only view ``(property)``"
-        return self.token
+        return self._token
     @property
     def cache_keys(self) -> list:
         "Return a list with the cache keys``(property)``"
@@ -83,7 +84,7 @@ class Player(object):
         return Player.__subclasses__()
     
     def is_subclass(self) -> bool:
-        return self in Player.subclasses() or isinstance(self, Player)
+        return self in Player.subclasses()
 
     def _clear_cache(self) -> None:
         "Reload the player cache, makes a new cache."
@@ -131,8 +132,6 @@ class Player(object):
             raise TypeError(f"That format is not valid. Valid formats: {self.__fmts}")
 
         return self.__fmts[__format_spec]+self._name+_Fore.RESET
-                #? ponemos el atributo de instancia y no la propiedad del nombre porque al ser de solo lectura
-                #? daria error de recursion
 
     def addmov(self, pos: tuple[int, int], time: float | int) -> None:
         "Add in a fast method one movement and it's time in the cache"

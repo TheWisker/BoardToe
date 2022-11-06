@@ -1,6 +1,6 @@
 from random import randint
-from src.Player import Player
-import src.core as core
+from Player import Player
+import core as core
 
 class Bot(Player):
     """
