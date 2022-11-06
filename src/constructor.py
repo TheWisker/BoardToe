@@ -154,7 +154,7 @@ class BoardGame:
     def handle_turn(self) -> tuple[int, int]:
         "Fuction to manage the turns"
 
-        if self.actual_turn.is_subclass():
+        if self.actual_turn.is_bot():
             turn_time, postuple = self.actual_turn.turn(self.board, self.actual_turn.btoken, self.game_lang)   
             # el bot trabaja con numeros. Devolvemos el token binario (propiedad btoken)
         else:

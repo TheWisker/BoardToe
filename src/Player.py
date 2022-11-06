@@ -107,8 +107,8 @@ class Player(object):
         "Lazy method to show all subclasses of this class"
         return Player.__subclasses__()
     
-    def is_subclass(self) -> bool:
-        return self in Player.subclasses()
+    def is_bot(self) -> bool:
+        return False
 
     def _clear_cache(self) -> None:
         "Reload the player cache, makes a new cache."

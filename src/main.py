@@ -1,5 +1,6 @@
 from constants import *
 from langs import Langs
+from Bot import Bot
 from constructor import BoardGame, Fore
 from Player import Player, _Col
 
@@ -37,9 +38,10 @@ def load_menu():
 
 
 # lang = input(f"{Langs.get_phrase('SPANISH', 'game', 0)} -> ") #¿En que idioma desea jugar?
-player1 = Player("⭕", "Alvaritow", "red")
+player1 = Player("❌", "Alvaritow", "red")
 player2 = Player("❌", "Fanico", "green")
-test = BoardGame(5,5, player1, player2, game_lang="SPANISH") 
+cpu = Bot()
+test = BoardGame(3,3, player1, cpu, game_lang="SPANISH") 
 
 test._clear_caches()
 test.init_game()

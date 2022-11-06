@@ -1,6 +1,7 @@
 from random import randint
 from Player import Player
 import core as core
+from datetime import datetime
 
 
 class Bot(Player):
@@ -10,13 +11,15 @@ class Bot(Player):
     each turn the get_move function should be called to get the move that this bot plays.
     """
 
-    def __init__(self, players: tuple[int, int] = (0,1), difficulty: str = "Easy") -> None:
-        self.bot = players[0]
-        self.plr = players[1]
+    def __init__(self):
+        self._token = ""
+        self._name = "CPU"
+        self._color = None
+        self.cache: dict = self._init_cache()
+        self.__custom_doc__ =  None
 
-        ...
 
-    def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]]) -> list[list[int]]:   #! TYPE HINTS
+    def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]]) -> list[list[int]]:
         r: list = []
         for moves in [pmoves, bmoves]:
             moves = [v for v in moves if v]
@@ -28,25 +31,19 @@ class Bot(Player):
                         rr[0] = v[0] if rr[0] > v[0] else rr[0]
                 r.append(rr)
         return r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
-            
-        """ PROBLEM WITH set() unhashable type: 'list'
-        if len(set(str(r[1]))) < len(r[1]):
-            t: list = [r[1].count(r[1][0]), r[1][0]]
-            for v in r[1][1:]:
-                t[1] = v if r[1].count(v) > t[0] else t[1]
-                t[0] = r[1].count(v) if r[1].count(v) > t[0] else t[0]
-        """
 
+    def is_bot(self) -> bool:
+        return True
 
     #! IMPORTANTE: 0 es False y 1 es True (comprobado)
     def turn(self, matrix: list[list[int]], player: int, lang: str):
-        matrix = core.transform2matrix(matrix)
+        self.logic_time = datetime.now()
         moves: list[list[int, int]] = self.filter_moves(core.adjacent_check(matrix, 0 if player else 1), core.adjacent_check(matrix, player))
-        return moves[randint(0 , len(moves)-1)]
+        self.logic_time = round((datetime.now()-self.logic_time).total_seconds(), 2)
+        x = moves[randint(0 , len(moves)-1)]
+        return [self.logic_time, (x[0]+1, x[1]+1)]
         # super().take_turn() to access to the base class method
 
-
-    
 
     def _get_cases(board: list[list[int]], player: int) -> list[tuple[int, int]]:
         results: bool | list[tuple[int, tuple[int, int]]] = core.check_matrix(board)
@@ -94,29 +91,6 @@ class Bot(Player):
 
             ...
 
-
-
-
-
-        #randint(..., ...)
-        #vi = _enemy_cases(board)
-        #vi = _enemy_cases(board)
-        return (2,2)
-
- 
-    #def restart(): #restart the bot but could not be necesary if we just delete and create a new instance
-     #   ...
-
-
-    # def _get_value(): #get value for a case scenario
-    #     ...
-    # def _maximin():
-    #     ...s
-    # def _minimax():
-    #     ...
-
-    # def _add_cache(): #add cache to better process the current match and options
-    #     ...
 models: dict[str, str] = {
     6: [
         [0, -1, 1],
@@ -139,4 +113,3 @@ models: dict[str, str] = {
         [1, 0, 2],
     ]
 } 
-print(Bot().turn(models[6], 0, ""))
