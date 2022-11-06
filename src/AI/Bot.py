@@ -1,5 +1,5 @@
 from random import randint
-from src.Player import Player
+from Player import Player
 import core as core
 
 
