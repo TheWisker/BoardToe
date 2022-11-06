@@ -1,5 +1,9 @@
 from random import randint
-from Player import Player
+import sys
+ 
+# setting path
+sys.path.append('../BoardToe')
+from BoardToe.Player import Player
 import core as core
 
 class Bot(Player):

@@ -24,7 +24,8 @@ __all__ = ["Player"]
 class Player(object):
     """Main player class with cache implementation."""
     # __slots__ = ("token", "name", "color", "cache")
-    __fmts: dict = _Col.static_cols_mapping
+    #__fmts: dict = _Col.static_cols_mapping ME SALE QUE NO EXISTE
+    __fmts: dict = _Col.static_colors
     # AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
 
     def __init__(
@@ -35,7 +36,6 @@ class Player(object):
         custom_doc: str = None
         
     ):
-
         if not isinstance(name, str):
             raise TypeError(f"@name param must be a string, not {name!r} of type {type(name).__name__}")
         elif not isinstance(token, str):
@@ -164,7 +164,7 @@ class Player(object):
             yield from self.cache[key]
         yield from self.cache.items()
 
-
+"""
 if __name__ == "__main__":
     player1 = Player("⭕", "Alvaritow", "red")
     player2 = Player("❌", "Fanico", "blue")
@@ -176,3 +176,4 @@ if __name__ == "__main__":
     print(player1.__sizeof__())
     print(player1.__doc__())
     print(1 == True)
+"""
