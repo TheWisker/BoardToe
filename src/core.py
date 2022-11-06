@@ -69,8 +69,8 @@ def transform2matrix(table: list[list], reps: list[tuple] = [("❌", 1), ("⭕",
     return table
 
 
-def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, numpymethod: bool = False, returnm: bool = True, ) -> list[list[int]] | None:
-    """
+"""def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, numpymethod: bool = False, returnm: bool = True, ) -> list[list[int]] | None:
+    
     ``Rota una matriz en sentido horario. La rotacion es de  90 Grados predeterminadamente``
     - NOTE: ``4 rotaciones equivalen a 360 grados, es decir, a la posicion original.``
 
@@ -85,7 +85,7 @@ def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, numpymethod: bool =
         [1,0,1]                [1,0,0]
         [0,1,1]                [1,1,1]
     ```
-    """
+    
     assert isinstance(matrix, list) and 3 <= len(matrix), f"Param @matrix must be a list and depth <= 3, no {type(matrix).__name__}"
     assert isinstance(nofrots, int) or nofrots <= 4, f"You are trying to rotate the matrix 360 degrees (Original position)!!"
 
@@ -115,7 +115,53 @@ def rotate_matrix(matrix: list[list[int]], nofrots: int = 1, numpymethod: bool =
             matrix[i][j] = matrix[i][N - j - 1]
             matrix[i][N - j - 1] = temp
     
-    return matrix if returnm else None
+    return matrix if returnm else None"""
+def rotate_matrix(matrix: list[list[int]], rts: int = 1) -> list[list[int]]:
+    """
+    ``Rota una matriz en sentido horario. La rotacion es de  90 Grados predeterminadamente``
+    - NOTE: ``4 rotaciones equivalen a 360 grados, es decir, a la posicion original.``
+
+    ### Hasta x2 veces mas rapido que el metodo de rotacion de matrices de ``numpy``
+    
+    ### Ejemplo
+    ```
+    1. Original matrix:        2. Rotating 1 time (default rotation):
+
+        Original               Rotated 90 degrees
+        [0,0,1]                [0,1,0]
+        [1,0,1]                [1,0,0]
+        [0,1,1]                [1,1,1]
+    ```
+    """
+    assert isinstance(matrix, list) and 3 <= len(matrix), f"Param @matrix must be a list and depth <= 3, no {type(matrix).__name__}"
+    assert isinstance(rts, int) or rts <= 4, f"You are trying to rotate the matrix 360 degrees (Original position)!!"
+
+    if rts > 1:
+        for _ in range(rts):
+            matrix = rotate_matrix(matrix, rts)
+        return matrix
+
+
+    r: list = deepcopy(matrix)
+    
+    N: int = len(matrix)
+
+    #transponemos la matriz hacia las agujas del reloj (90 Grados)
+    for k in range(N):
+        print("K:", k)
+        for kk in range(k):
+            print("KK:", kk)
+            r[k][kk], r[kk][k] = r[kk][k], r[k][kk]
+        
+    #aqui cambias las columnas (columnas de intercambio)
+    for k in range(N):
+        for kk in range(N // 2):
+            r[k][kk], r[k][N - kk - 1] = r[k][N - kk - 1], r[k][kk]
+             
+
+
+    return r
+
 
 
 def rotate_index(inx: list[int, int], depth: int, b: bool = True) -> list[int, int]:
@@ -242,6 +288,7 @@ def dcheck(matrix: list[tuple[int]]) -> list[list[int | tuple[int, int]]] | list
 
 def adjacent_check(matrix: list[list[int]], n: int) -> list[tuple[int, tuple[int]]]: #[(player, (x,y))]
     "Function that returns a list with the adjacent positions to each player"
+    pretty_view(matrix)
     return corner_check(matrix, n) + cross_check(matrix, n)
 
 def corner_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[int, int]]]]:
@@ -249,12 +296,15 @@ def corner_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[i
 
 def row_check(matrix: list[list[int]], n: int, rt: bool = False) -> list[tuple[int, list[int]]] | None:
     r: list = []
+    pretty_view(matrix)
     for k,v in enumerate(matrix):
         if (len(set(v)) == 2 and all(x in set(v) for x in [-1, n])) or (len(set(v)) == 1 and v[0] == -1):
             rr: list = []
             for kk,vv in enumerate(v):
                 if vv == -1:
+                    print("FFV", [k, kk], rotate_index([k, kk], len(matrix)), rt)
                     rr.append(rotate_index([k, kk], len(matrix)) if rt else [k, kk])
+            print("FFFV", rr)
             r.append((v.count(-1), rr))
     return r if r else [None]
 
@@ -265,11 +315,15 @@ def cross_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[in
 
 def dgn_check(matrix: list[list[int]], n: int, rt: bool = False) -> tuple[int, list[list[int, int]]] | None:
     r: list = []
+    print(rt)
     dgn: list = [matrix[i][i] for i in range(len(matrix))]
     if (len(set(dgn)) == 2 and all(x in set(dgn) for x in [-1, n])) or (len(set(dgn)) == 1 and dgn[0] == -1):
         for k,v in enumerate(dgn):
             if v == -1:
+                print("FF", [k, k], reverse_index([k, k], len(matrix)), rt)
                 r.append(reverse_index([k, k], len(matrix)) if rt else [k, k])
+
+        print("FFF", r)
     return (dgn.count(-1), r) if r else None
 
 def check_win(matrix: list[list[int]], player: dict[str,]) -> list[list]: 

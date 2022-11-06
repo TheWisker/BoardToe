@@ -14,7 +14,6 @@ from pybeaut import Col as _Col
 from colorama import Fore
 
 
-import PIL.Image as Image
 
 
 
@@ -182,11 +181,11 @@ class BoardGame:
         """
         posx, posy = pos[0]-1, pos[1]-1
 
-
+  
         if table[posx][posy] != -1:
             #? la posicion ya esta cogida, evitamos que tenga que comprobar de que tipo es.
             print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 2).format(pos)}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
-
+            input("Error 3")
             posx, posy = self.handle_turn()
             return self.draw_board(table, (posx, posy), player)
             
@@ -198,7 +197,9 @@ class BoardGame:
 
 
         table[posx][posy] = player.btoken
-        
+
+        #core.pretty_view(table)
+
         #? Guarda el movimiento del jugador en su cache. SOLO LAS COORDENADAS y el TIEMPO
         player.addmov(pos, self.turn_time)   
         self._party_cache["party"]["movements"].append(self._movtuple(player.token, player.name, pos, self.turn_time))
@@ -317,12 +318,15 @@ class BoardGame:
         self._playing: bool             = True
         self.actual_turn: Player        = choice(self._party_cache["players"])
 
+        print("Game started")
         try:
             while self._playing:
                 self.partycounter  = datetime.now()
 
                 self._pprint(self.board)
                 posx, posy = self.handle_turn()
+                print(posx, posy)
+                #core.pretty_view(self.board)
                 self.draw_board(self.board, (posx, posy), self.actual_turn)
                 
                 if self.checkWin():
@@ -337,7 +341,7 @@ class BoardGame:
                     print(f"EMPATE!!")
                     break              
 
-                cls()
+                #cls()
 
         except KeyboardInterrupt:
             print(f"\n{Fore.LIGHTYELLOW_EX}[GAME LOOP STOPED] -> {Langs.get_phrase(self.game_lang, 'runtime', 0)}{Fore.RESET}") #Se ha finalizado el juego forzosamente.
@@ -351,6 +355,7 @@ class BoardGame:
         self._party_cache["party"]["total_time"] = self.partycounter
         self._game_cache.append(self._party_cache)
         self._playing = False
+        print(str(self.player1.cache) + '\n' + str(self.player2.cache))
 
         self._clear_caches()
 

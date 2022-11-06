@@ -6,15 +6,12 @@ from Player import Player, _Col
 
 try:
     from pybeaut import *
-except (ImportError or ModuleNotFoundError) as i:
+except (ImportError or ModuleNotFoundError) as e:
     from os import system, name
-    print(f"\n[MISSING INDEPENDENCIES] -> It seems that you are missing a requeriment to play the game. Missing {i.name if i.name else 'one module'}.")
+    print(f"\n[MISSING INDEPENDENCIES] -> It seems that you are missing a requeriment to play the game. Missing {e.name if e.name else 'one module'}.")
     print("Preparing...")
     system("pip install -U pybeaut" if name == "nt" else "pip3 install -U pybeaut")
-    print(f"Successfully installed {i.name}\n")
-
-
-
+    print(f"Successfully installed {e.name}\n")
 
 #TODO ///////////////////////////////////////      TUI SECTION        ////////////////////////////////////////////////
 
@@ -40,8 +37,8 @@ def load_menu():
 # lang = input(f"{Langs.get_phrase('SPANISH', 'game', 0)} -> ") #¿En que idioma desea jugar?
 player1 = Player("❌", "Alvaritow", "red")
 player2 = Player("❌", "Fanico", "green")
-cpu = Bot()
-test = BoardGame(3,3, player1, cpu, game_lang="SPANISH") 
+
+test = BoardGame(3,3, Bot("❌"), Bot("⭕"), game_lang="SPANISH") 
 
 test._clear_caches()
 test.init_game()

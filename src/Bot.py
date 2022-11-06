@@ -11,8 +11,8 @@ class Bot(Player):
     each turn the get_move function should be called to get the move that this bot plays.
     """
 
-    def __init__(self):
-        self._token = ""
+    def __init__(self, token):
+        self._token = token
         self._name = "CPU"
         self._color = None
         self.cache: dict = self._init_cache()
@@ -21,6 +21,13 @@ class Bot(Player):
 
     def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]]) -> list[list[int]]:
         r: list = []
+
+        if not pmoves:
+            print("Player l")
+        elif not bmoves:
+            print("Bot l")
+
+
         for moves in [pmoves, bmoves]:
             moves = [v for v in moves if v]
             if moves:
@@ -30,6 +37,9 @@ class Bot(Player):
                         rr[1] = [_ for _ in v[1]] if rr[0] > v[0] else [_ for _ in rr[1]] + [_ for _ in v[1]] if rr[0] == v[0] else rr[1]
                         rr[0] = v[0] if rr[0] > v[0] else rr[0]
                 r.append(rr)
+
+        
+
         return r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
 
     def is_bot(self) -> bool:
@@ -40,9 +50,48 @@ class Bot(Player):
         self.logic_time = datetime.now()
         moves: list[list[int, int]] = self.filter_moves(core.adjacent_check(matrix, 0 if player else 1), core.adjacent_check(matrix, player))
         self.logic_time = round((datetime.now()-self.logic_time).total_seconds(), 2)
+        print(player, 0 if player else 1)
+        print("X",core.adjacent_check(matrix, player))
+        print("Y",core.adjacent_check(matrix, 0 if player else 1))
+        print("Z",moves)
+        moves = [max(set([tuple(m) for m in moves]), key = [tuple(m) for m in moves].count)]
+        print("A",moves)
+        [(3, [[0, 0], [0, 1], [0, 2]]), (3, [[1, 0], [1, 1], [1, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (3, [[2, 1], [1, 1], [0, 1]]), (3, [[2, 2], [1, 2], [0, 2]]), (3, [[0, 0], [1, 1], [2, 2]]), (3, [[0, 2], [1, 1], [2, 0]])]
+        [(3, [[0, 0], [0, 1], [0, 2]]), (3, [[1, 0], [1, 1], [1, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (3, [[2, 1], [1, 1], [0, 1]]), (3, [[2, 2], [1, 2], [0, 2]]), (3, [[0, 0], [1, 1], [2, 2]]), (3, [[0, 2], [1, 1], [2, 0]])]
+        [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2], [2, 0], [1, 0], [0, 0], [2, 1], [1, 1], [0, 1], [2, 2], [1, 2], [0, 2], [0, 0], [1, 1], [2, 2], [0, 2], [1, 1], [2, 0]]
+        (1, 1)
+
+        [(3, [[0, 0], [0, 1], [0, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (1, [[0, 1]]), (2, [[0, 0], [2, 2]]), None]
+
+        [(3, [[0, 0], [0, 1], [0, 2]]), (1, [[2, 2]]), (3, [[2, 2], [1, 2], [0, 2]]), None, None]
+        [[1, 0]]
+        [(1, 0)]
+
+        [(3, [[0, 0], [0, 1], [0, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (3, [[2, 2], [1, 2], [0, 2]]), None, None]
+        [(3, [[0, 0], [0, 1], [0, 2]]), (2, [[1, 0], [1, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (2, [[2, 1], [0, 1]]), (3, [[2, 2], [1, 2], [0, 2]]), (2, [[0, 0], [2, 2]]), (2, [[0, 2], [2, 0]])]
+        [[1, 0], [1, 2], [2, 1], [0, 1], [0, 0], [2, 2], [0, 2], [2, 0]]
+        [(0, 1)]
+
+
+        [(2, [[2, 0], [2, 1]]), None, None, None]
+        [(1, [[0, 1]]), (1, [[1, 0]]), None, (1, [[2, 0]])]
+        [[0, 1], [1, 0], [2, 0]]
+        [(0, 1)]
+
+        [(3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 2], [1, 2], [0, 2]]), None, None]
+        [(2, [[1, 0], [1, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (2, [[2, 0], [1, 0]]), (3, [[2, 2], [1, 2], [0, 2]]), (1, [[2, 2]]), (2, [[0, 2], [2, 0]])]
+        [[2, 2]]
+        [(2, 2)]
+
+
+        #BOT PRIORICES FUCKING PLAYER THAN HELPIN HIMSELF SOMETIMES
+
+
         x = moves[randint(0 , len(moves)-1)]
         return [self.logic_time, (x[0]+1, x[1]+1)]
         # super().take_turn() to access to the base class method
+
+    
 
 
     def _get_cases(board: list[list[int]], player: int) -> list[tuple[int, int]]:
