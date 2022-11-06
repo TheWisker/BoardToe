@@ -240,35 +240,37 @@ def dcheck(matrix: list[tuple[int]]) -> list[list[int | tuple[int, int]]] | list
     return r
 
 
-def adjacent_check(matrix: list[list[int]], n: int) -> list[tuple[int, tuple[int, int]]]: #[(player, (x,y))]
+def adjacent_check(matrix: list[list[int]], n: int) -> list[tuple[int, tuple[int]]]: #[(player, (x,y))]
     "Function that returns a list with the adjacent positions to each player"
-    return [_ for _ in row_check(matrix, n)].extend(row_check(rotate_matrix(matrix), n, True)).extend(cross_check(matrix, n))
+    return corner_check(matrix, n) + cross_check(matrix, n)
 
+def corner_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[int, int]]]]:
+    return row_check(matrix, n) + row_check(rotate_matrix(matrix), n, True)
 
-def row_check(matrix: list[list[int]], n: int, rt: bool = False) -> list[tuple[int, list[int, int]]]:
+def row_check(matrix: list[list[int]], n: int, rt: bool = False) -> list[tuple[int, list[int]]] | None:
     r: list = []
     for k,v in enumerate(matrix):
-        if len(set(v)) == 2 and all(x in set(v) for x in [-1, n]):
+        if (len(set(v)) == 2 and all(x in set(v) for x in [-1, n])) or (len(set(v)) == 1 and v[0] == -1):
             rr: list = []
             for kk,vv in enumerate(v):
                 if vv == -1:
                     rr.append(rotate_index([k, kk], len(matrix)) if rt else [k, kk])
             r.append((v.count(-1), rr))
-    return r
+    return r if r else [None]
 
 
 def cross_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[int, int]]]]:
-    return [].extend(dgn_check(matrix, n)).extend(dgn_check(reverse_matrix(matrix), n, True))
+    return [dgn_check(matrix, n), dgn_check(reverse_matrix(matrix), n, True)]
 
 
-def dgn_check(matrix: list[list[int]], n: int, rt: bool = False) -> tuple[int, list[list[int, int]]]:
+def dgn_check(matrix: list[list[int]], n: int, rt: bool = False) -> tuple[int, list[list[int, int]]] | None:
     r: list = []
     dgn: list = [matrix[i][i] for i in range(len(matrix))]
-    if len(set(dgn)) == 2 and all(x in set(dgn) for x in [-1, n]):
+    if (len(set(dgn)) == 2 and all(x in set(dgn) for x in [-1, n])) or (len(set(dgn)) == 1 and dgn[0] == -1):
         for k,v in enumerate(dgn):
+            if v == -1:
                 r.append(reverse_index([k, k], len(matrix)) if rt else [k, k])
-    return (dgn.count(-1), r)
-
+    return (dgn.count(-1), r) if r else None
 
 def check_win(matrix: list[list[int]], player: dict[str,]) -> list[list]: 
     """Comprueba y devuelve que jugadores pueden ganar colocando una sola ficha
