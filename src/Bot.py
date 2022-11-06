@@ -38,10 +38,25 @@ class Bot(Player):
                         rr[0] = v[0] if rr[0] > v[0] else rr[0]
                 r.append(rr)
 
-        
+        if r:
+            return r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
+        else:
+            input("EMPATE")
 
+    """
+    Traceback (most recent call last):
+    File "/home/kopi/GitHub/BoardToe/src/main.py", line 44, in <module>
+        test.init_game()
+    File "/home/kopi/GitHub/BoardToe/src/constructor.py", line 327, in init_game
+        posx, posy = self.handle_turn()
+    File "/home/kopi/GitHub/BoardToe/src/constructor.py", line 157, in handle_turn
+        turn_time, postuple = self.actual_turn.turn(self.board, self.actual_turn.btoken, self.game_lang)   
+    File "/home/kopi/GitHub/BoardToe/src/Bot.py", line 51, in turn
+        moves: list[list[int, int]] = self.filter_moves(core.adjacent_check(matrix, 0 if player else 1), core.adjacent_check(matrix, player))
+    File "/home/kopi/GitHub/BoardToe/src/Bot.py", line 43, in filter_moves
         return r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
-
+    IndexError: list index out of range
+    """
     def is_bot(self) -> bool:
         return True
 
