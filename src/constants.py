@@ -1,3 +1,4 @@
+from colorama import Fore
 XTOKEN              = "❌"
 OTOKEN              = "⭕"
 EMPTOKEN            = "➖"

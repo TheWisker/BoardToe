@@ -21,12 +21,37 @@ from pybeaut import Col as _Col
 __all__ = ["Player"]
 
 
+# static_cols_mapping: dict = {
+#         "red": red,
+#         "green": green, 
+#         "blue": blue, 
+#         "white": white,
+#         "black": black,
+#         "gray": gray,
+#         "yellow": yellow, 
+#         "purple": purple,
+#         "cyan": cyan,
+#         "orange": orange, 
+#         "pink": pink, 
+#         "turquoise": turquoise,
+#         "light_gray": light_gray,
+#         "dark_gray": dark_gray,
+#         "light_red": light_red,
+#         "light_green": light_green,
+#         "light_blue": light_blue,
+#         "dark_red": dark_red, 
+#         "dark_green": dark_green, 
+#         "dark_blue": dark_blue,
+#         "reset": reset,
+#     }
+
+
 class Player(object):
     """Main player class with cache implementation."""
+    
     # __slots__ = ("token", "name", "color", "cache")
-    #__fmts: dict = _Col.static_cols_mapping ME SALE QUE NO EXISTE
-    __fmts: dict = _Col.static_colors
-    # AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
+    __fmts: dict = _Col.static_cols_mapping
+    AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
 
     def __init__(
         self,
@@ -43,7 +68,7 @@ class Player(object):
         elif not token in TOKENS:
             raise TypeError(f"@token param is a invalid token. Valid token: '⭕' or '❌'")
         elif not color in self.__fmts:
-            raise TypeError(f"@color param must be a valid color. Valid colors: {self.__fmts}")
+            raise TypeError(f"@color param must be a valid color. Valid colors: {self.__fmts.keys()}")
         
         self._name:    str   = name     #* default 'Player'
         self._token:   str   = token
@@ -76,9 +101,6 @@ class Player(object):
     def cache_size(self) -> int | float:
         "Return the size of the cache in bytes.``(property)``"
         return self.cache.__sizeof__()
-    def view_movements(self) -> list:
-        "Return a read-only view of cached list movements ``(property)``"
-        return self.cache["movements"]
 
     @staticmethod
     def subclasses() -> list:
@@ -128,11 +150,11 @@ class Player(object):
         """
         __format_spec = __format_spec.lower()
 
-        if __format_spec.startswith("tkn") and __format_spec[3:] in self.__fmts.keys():
+        if __format_spec.startswith("tkn") and __format_spec[3:] in self.__fmts:
             return self.__fmts[__format_spec[3:]]+self._token+_Fore.RESET
 
-        if not __format_spec in self.__fmts.keys():
-            raise TypeError(f"That format is not valid. Valid formats: {self.__fmts}")
+        if not __format_spec in self.__fmts:
+            raise TypeError(f"That format is not valid. Valid formats: {self.__fmts.keys()}")
 
         return self.__fmts[__format_spec]+self._name+_Fore.RESET
 
@@ -164,16 +186,15 @@ class Player(object):
             yield from self.cache[key]
         yield from self.cache.items()
 
-"""
+
 if __name__ == "__main__":
     player1 = Player("⭕", "Alvaritow", "red")
     player2 = Player("❌", "Fanico", "blue")
     print((player1.btoken, player1.token),(player2.btoken, player2.token))
 
-    print(f"{player2:red} ---- {player1:red}")
+    print(f"{player2:red} ---- {player1:red} ---- {player1:w} ---- {player2:blue}")
     # print(t.__weakref__())
     print(player1.__dir__())
     print(player1.__sizeof__())
     print(player1.__doc__())
     print(1 == True)
-"""

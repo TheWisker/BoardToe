@@ -14,6 +14,9 @@ from pybeaut import Col as _Col
 from colorama import Fore
 
 
+import PIL.Image as Image
+
+
 
 
 class BoardGame:
