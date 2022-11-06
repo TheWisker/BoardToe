@@ -1,14 +1,14 @@
 from utils import *
+from constants import *
 from langs import Langs
 from Player import Player
 import core as core
 
-from random import choice, randint
-from time import time, sleep
+from random import choice
 from datetime import datetime
 from collections import namedtuple
 from os import get_terminal_size
-from threading import Thread
+# from threading import Thread
 
 from pybeaut import Col as _Col
 from colorama import Fore
@@ -19,13 +19,10 @@ from colorama import Fore
 class BoardGame:
 
     _movtuple           = namedtuple("Movement", ["token", "player_name", "position", "moviment_time"])
-    _ptycachetuple      = namedtuple("PartyCache", ["partymapping"])
-
-    XTOKEN              = "❌"
-    XCOLOR              = Fore.LIGHTRED_EX      #* static color for 'X' if player does not give any color
-    OTOKEN              = "⭕"
+    _ptycachetuple      = namedtuple("PartyCache", ["dictmap"])
+    
     OCOLOR              = Fore.LIGHTWHITE_EX    #* static color for '0' if player does not give any color
-    EMPTOKEN            = "➖"
+    XCOLOR              = Fore.LIGHTRED_EX      #* static color for 'X' if player does not give any color
 
     def __init__(
         self, 
@@ -111,7 +108,7 @@ class BoardGame:
             Despues: 
             >>> t = [['-' for _ in range(len(table))] for _ in range(len(table))]"""
 
-        t = [[self.EMPTOKEN for _ in range(self.rows)] for _ in range(self.columns)]
+        t = [[EMPTOKEN for _ in range(self.rows)] for _ in range(self.columns)]
         return t
 
 
@@ -125,6 +122,7 @@ class BoardGame:
     def _pprint(self, table) -> None:
         "Prints the table in a pretty way (without colons and token-colored)"
 
+        self.board = core.transform2matrix(self.board, reverse_method=True) #? la transformamos a caracteres (esta en numeros)
         columns, lines = get_terminal_size().columns, get_terminal_size().lines
         print("\n")     # white line to stylize
         for i, column in enumerate(table):
@@ -134,12 +132,13 @@ class BoardGame:
                         (",", "  "), 
                         ("[", f"{Fore.LIGHTBLUE_EX}║{Fore.RESET} "),
                         ("]", f" {Fore.LIGHTBLUE_EX} ║{Fore.RESET}"),
-                        ("⭕", f"{self.OCOLOR}⭕{Fore.RESET}"), 
-                        ("❌", f"{self.XCOLOR}❌{Fore.RESET}")
+                        (OTOKEN, f"{self.OCOLOR}{OTOKEN}{Fore.RESET}"), 
+                        (XTOKEN, f"{self.XCOLOR}{XTOKEN}{Fore.RESET}")
                     )
                 )
             )
         print("\n")     # white line to stylize
+        self.board = core.transform2matrix(self.board) #? la transformamos a numeros de nuevo
 
 
     def show_stats(self) -> str | dict[str,]:
@@ -153,8 +152,8 @@ class BoardGame:
         "Fuction to manage the turns"
 
         if self.actual_turn.is_subclass():
-            numtoken = 0 if self.actual_turn.token == self.OTOKEN else 1
-            turn_time, postuple = self.actual_turn.turn(self.board, numtoken, self.game_lang)   # el bot trabaja con numeros. Devolvemos el token como 0 o 1
+            turn_time, postuple = self.actual_turn.turn(self.board, self.actual_turn.btoken, self.game_lang)   
+            # el bot trabaja con numeros. Devolvemos el token binario (propiedad btoken)
         else:
             turn_time, postuple = self.actual_turn.turn(self.game_lang)
 
@@ -181,24 +180,24 @@ class BoardGame:
         posx, posy = pos[0]-1, pos[1]-1
 
 
-        if table[posx][posy] != self.EMPTOKEN:
+        if table[posx][posy] != -1:
             #? la posicion ya esta cogida, evitamos que tenga que comprobar de que tipo es.
-            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 2).format(pos, table[posx][posy])}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
+            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 2).format(pos)}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
 
             posx, posy = self.handle_turn()
             return self.draw_board(table, (posx, posy), player)
             
-        elif table[posx][posy] == player.token:
+        elif table[posx][posy] == player.btoken:
             #? la posicion esta ocupada por una ficha del mismo tipo
             print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 3)}{Fore.RESET}") #¡Ya has puesto una ficha en esta posicion!
             posx, posy = self.handle_turn()
             return self.draw_board(table, (posx, posy), player)
 
 
-        table[posx][posy] = player.token
+        table[posx][posy] = player.btoken
         
-        #? Guarda el movimiento del jugador en su cache. SOLO LAS COORDENADAS
-        player.addmov(pos, self.turn_time)      #? tambien añade el tiempo
+        #? Guarda el movimiento del jugador en su cache. SOLO LAS COORDENADAS y el TIEMPO
+        player.addmov(pos, self.turn_time)   
         self._party_cache["party"]["movements"].append(self._movtuple(player.token, player.name, pos, self.turn_time))
         
         _last_turn_index = self._party_cache["players"].index(self.actual_turn)
@@ -215,9 +214,7 @@ class BoardGame:
             - Diagonal en tablas par
             - Diagonal en tablas impar
         """
-
-        self.board = core.transform2matrix(self.board) #? la transformamos a binarios
-        
+ 
 
         # for subarrays in self.board:
         #     if subarrays[0] == -1 or len(set(subarrays[0])) > 1:
@@ -230,8 +227,8 @@ class BoardGame:
             if -1 in subarrays:
                 continue
             elif len(set(subarrays)) == 1:
-                self.board = core.transform2matrix(self.board, reverse_method=True)
                 self._save_win_to_cache("Horizontal")
+                return True
         
         for i in range(len(self.board)):
             if (self.board[0][i] == -1 or self.board[-1][i] == -1) or (self.board[-1][i] != self.board[0][i]):
@@ -239,7 +236,6 @@ class BoardGame:
             checks = [self.board[_][i] for _ in range(1, len(self.board)-1)]
             if all(elem == self.board[0][i] for elem in checks):
                 self._save_win_to_cache("Vertical")
-                self.board = core.transform2matrix(self.board, reverse_method=True)
                 return True
 
 
@@ -248,7 +244,6 @@ class BoardGame:
             token = self.board[(len(self.board)//2)][(len(self.board)//2)]  #? centro de la matriz
         
             if token == -1:    #* si el centro de la matriz no es X o 0, no hay ninguna diagonal
-                self.board = core.transform2matrix(self.board, reverse_method=True)
                 return False
 
             if self.board[0][0] == self.board[-1][-1] and self.board[0][0] == token:
@@ -257,7 +252,6 @@ class BoardGame:
                         break
                     elif i == len(self.board)-2:   #* Si la ultima iteracion i es igual a la longitud de la tabla-2, quiere decir que todas las iteraciones anteriores son True, formando una diagonal.
                         self._save_win_to_cache("Downwards diagonal")
-                        self.board = core.transform2matrix(self.board, reverse_method=True)
                         return True
 
             if self.board[0][-1] == self.board[-1][0] and self.board[0][-1] == token:
@@ -266,13 +260,11 @@ class BoardGame:
                         break
                     elif s == len(self.board)-2:   #* Si la ultima iteracion i es igual a la longitud de la tabla-2, quiere decir que todas las iteraciones anteriores son True, formando una diagonal.
                         self._save_win_to_cache("Upwards diagonal")
-                        self.board = core.transform2matrix(self.board, reverse_method=True)
                         return True
 
         #! Metodo diagonal con impares
         else:
             if self.board[0][0] == -1 or self.board[0][-1] == -1:     #* Si alguna de las esquinas de las diagonales posibles esta vacia, no hay diagonales.
-                self.board = core.transform2matrix(self.board, reverse_method=True)
                 return False
 
             if self.board[0][0] == self.board[-1][-1]:
@@ -282,7 +274,6 @@ class BoardGame:
                     elif i == len(self.board)-2:   #* Si la ultima iteracion i es igual a la longitud de la tabla-2 
                         #* (la posicion anterior a la esquina que no cuenta), quiere decir que todas las iteraciones anteriores son True, formando una diagonal.
                         self._save_win_to_cache("Downwards diagonal")
-                        self.board = core.transform2matrix(self.board, reverse_method=True)
                         return True
 
             if self.board[0][-1] == self.board[-1][0]:
@@ -291,31 +282,26 @@ class BoardGame:
                         break
                     elif s == len(self.board)-2:  
                         self._save_win_to_cache("Upwards diagonal")
-                        self.board = core.transform2matrix(self.board, reverse_method=True)
                         return True
 
-        self.board = core.transform2matrix(self.board, reverse_method=True)
         return False
             
 
     def checkDraw(self) -> bool:
         "Verifica si ha habido un empate. Por ahora solo verifica que ha habido un empate cuando en la tabla no hay mas posiciones libres y nadie a ganado"
         empty_locs = 0
-        self.board = core.transform2matrix(self.board)
 
         for i in range(len(self.board)):
             if any(elem == -1 for elem in self.board[i]):
                 break
             if i == len(self.board)-1:
                 self._save_win_to_cache("Draw")
-                self.board = self.board = core.transform2matrix(self.board, reverse_method=True)
                 return True
 
         for i,s in zip(range(len(self.board)), range(0, len(self.board), -1)):
             if self.board[i][s] == -1:
                 empty_locs += 1
 
-        self.board = self.board = core.transform2matrix(self.board, reverse_method=True)
         return False
                 
         
@@ -324,7 +310,7 @@ class BoardGame:
 
         self._clear_caches()     #* vacia la cache para iniciar una nueva partida, aunque ya se haya limpiado antes.  
 
-        self.board: list[list]          = self._make_board()
+        self.board: list[list]          = core.transform2matrix(self._make_board())
         self._playing: bool             = True
         self.actual_turn: Player        = choice(self._party_cache["players"])
 

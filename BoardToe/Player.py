@@ -9,6 +9,7 @@ and may u want to do this to make other player object neither with special metho
 """
 from langs import Langs
 from utils import *
+from constants import *
 
 from datetime import datetime
 from typing import MutableMapping
@@ -39,19 +40,17 @@ class Player(object):
             raise TypeError(f"@name param must be a string, not {name!r} of type {type(name).__name__}")
         elif not isinstance(token, str):
             raise TypeError(f"@token param must be a string, not {token!r} of type {type(token).__name__}")
-        elif not token in {"⭕", "❌"}:
+        elif not token in TOKENS:
             raise TypeError(f"@token param is a invalid token. Valid token: '⭕' or '❌'")
         elif not color in self.__fmts:
             raise TypeError(f"@color param must be a valid color. Valid colors: {self.__fmts}")
         
         self._name:    str   = name     #* default 'Player'
         self._token:   str   = token
-        self._color:   str   = color
+        self._color:   str   = self.__fmts[color]
         self.cache:  dict | MutableMapping = self._init_cache()
-        
-        if custom_doc is not None:
-            assert isinstance(custom_doc, str)
-            self.__custom_doc__ = custom_doc
+
+        self.__custom_doc__ = custom_doc if custom_doc is not None and isinstance(custom_doc, str) else None
 
     @property
     def name(self) -> str:
@@ -66,14 +65,17 @@ class Player(object):
         "Return the token of the player in a read-only view ``(property)``"
         return self._token
     @property
+    def btoken(self) -> str:
+        "Return the token as a number (0 for 0, 1 for X) ``(property)``"
+        return 1 if self._token == XTOKEN else 0
+    @property
     def cache_keys(self) -> list:
         "Return a list with the cache keys``(property)``"
         return list(self.cache.keys())
     @property
     def cache_size(self) -> int | float:
         "Return the size of the cache in bytes.``(property)``"
-        return self.cache.__hash__()
-    @property 
+        return self.cache.__sizeof__()
     def view_movements(self) -> list:
         "Return a read-only view of cached list movements ``(property)``"
         return self.cache["movements"]
@@ -108,6 +110,7 @@ class Player(object):
     def __doc__(self):
         if self.__custom_doc__:
             return __doc__  + "\nCustom documentation: \n" + self.__custom_doc__ 
+        return __doc__
             
     def __format__(self, __format_spec: str) -> str:
         """Special overrided method (to object superclass) to format a instance of a player when we print the instance.
@@ -153,7 +156,7 @@ class Player(object):
         posy = input(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}{Langs.get_phrase(lang, 'game', 3).format('Y')} -> {_Fore.RESET}") 
         t = round((datetime.now()-t).total_seconds(), 2)
 
-        return [t, (posx, posy)]
+        return [t, (posx, posy)]    #* [time, (posx, posy)]
 
     def cache_gen(self, key: lambda x: x = None):
         "Useless lazy method that yields the cache and returns and iterator."
@@ -163,10 +166,13 @@ class Player(object):
 
 
 if __name__ == "__main__":
-    t = Player("X", "LOOOL")
-    print(f"{t:red}")
+    player1 = Player("⭕", "Alvaritow", "red")
+    player2 = Player("❌", "Fanico", "blue")
+    print((player1.btoken, player1.token),(player2.btoken, player2.token))
+
+    print(f"{player2:red} ---- {player1:red}")
     # print(t.__weakref__())
-    print(t.__dir__())
-    print(t.__sizeof__())
-    print(t.__doc__)
-    print(0 == True)
+    print(player1.__dir__())
+    print(player1.__sizeof__())
+    print(player1.__doc__())
+    print(1 == True)

@@ -13,7 +13,7 @@ class Langs:
                 "errors": [
                     "¡Las coordenadas deben ser numeros!", #0
                     "Las coordenadas deben estar entre 1 y {}", #1
-                    "¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, Token: {})", #2
+                    "¡Ops! Esa posicion ya esta ocupada. (Posicion: {})", #2
                     "¡Ya hay una ficha en esta posicion!" #3
                 ],
                 "runtime": [

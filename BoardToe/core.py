@@ -27,7 +27,7 @@ def pretty_view(matrix: list[list[int]]) -> None:
     """
 
 
-def transform2matrix(table: list[list], reps: list[tuple] = [("❌", 1), ("⭕", 0), ("➖", -1)], reverse_method: bool = None) -> list:
+def transform2matrix(table: list[list], reps: list[tuple] = [("❌", 1), ("⭕", 0), ("➖", -1)], reverse_method: bool = False) -> list:
     """
     ``Refactoriza una lista bimimensional o superior.``\n
     - Para hacer el proceso contrario, poner como ``True`` el parametro ``reverse_method``
@@ -45,7 +45,7 @@ def transform2matrix(table: list[list], reps: list[tuple] = [("❌", 1), ("⭕",
     # print(transform2matrix(er))
     assert isinstance(table, list) and 3 <= len(table), f"Param @matrix must be a list and depth <= 3, no {type(table).__name__}"
 
-    if reverse_method is not None:
+    if reverse_method:
         for t in table:
             for _ in range(len(table)):
                 for r in reps:

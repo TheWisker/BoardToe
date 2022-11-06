@@ -15,6 +15,7 @@ class Bot(Player):
 
         ...
 
+    #! IMPORTANTE: 0 es False y 1 es True (comprobado)
     def turn(matrix: list[list[int]], player: int, lang: str):
         matrix = core.transform2matrix(matrix)
 
@@ -70,6 +71,7 @@ class Bot(Player):
     Posible implementacion del cache de botico, con improbable analisis de toma de decisiones (Muy complejo)
     """
     
+
     def get_move(self, board) -> tuple[int, int]:
         bot_cases: list[tuple[int, int]] = self._get_cases(board, self.bot)
         plr_cases: list[tuple[int, int]] = self._get_cases(board, self.plr)
