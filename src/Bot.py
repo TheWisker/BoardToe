@@ -59,21 +59,11 @@ class Bot(Player):
             "predicted_moves": [] #? Solo el bot
         }   
 
-    def __max(self, values: list[list[int]]) -> list[list[int]] | list[int]:
-        values = [tuple(_) for _ in values]
-        r: list = [0, []]
-        for v in set(values):
-            c: int = values.count(v)
-            print("C", c > r[0])
-            r[1] = [v] if c > r[0] else r[1] + [v] if c == r[0] else r[1]
-            r[0] = c if c > r[0] else r[0]
-        return r[1]
-
-
+    
 
     def turn(self, matrix: list[list[int]], lang: str) -> list[float | tuple[int]]:
         t = datetime.now()
-        moves: list[list[int]] | None = self.filter_moves(core.win_check(matrix, self.betoken), core.win_check(matrix, self.btoken))
+        moves: list[list[int]] | None = self.filter_moves(core.win_check(matrix, self.betoken), core.win_check(matrix, self.btoken), len(matrix))
         t = (datetime.now()-t).microseconds
         if moves:
             moves = self.__max(moves)
@@ -82,16 +72,13 @@ class Bot(Player):
 
         x = moves[randint(0 , len(moves)-1)]
         print(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}Placed a token on {_Fore.LIGHTCYAN_EX}{(x[0]+1, x[1]+1)}{_Fore.LIGHTWHITE_EX} -> {_Fore.LIGHTYELLOW_EX}{t}μs{_Fore.RESET}")
-        print("X", len(moves))
 
         #BOT PRIORICES FUCKING PLAYER THAN HELPIN HIMSELF SOMETIMES, MAKE IT RANDOM EXCEPT ENEMY WIN
         return [t, (x[0]+1, x[1]+1)]
 
-
-    def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]]) -> list[list[int]] | None:
+    def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]], d: int) -> list[list[int]] | None:
+        d = d + 1 if d == 3 else d
         r: list = []
-        print(pmoves)
-        print(bmoves)
         for moves in [pmoves, bmoves]:
             moves = [v for v in moves if v]
             if moves:
@@ -101,8 +88,18 @@ class Bot(Player):
                         rr[1] = [_ for _ in v[1]] if rr[0] > v[0] else [_ for _ in rr[1]] + [_ for _ in v[1]] if rr[0] == v[0] else rr[1]
                         rr[0] = v[0] if rr[0] > v[0] else rr[0]
                 r.append(rr)
-        return None if not r else r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
+
+        return None if not r else r[0][1] if len(r) == 1 else r[1][1] if r[1][0] < r[0][0] or (r[0][0] >= d - 2 and randint(0,1)) else r[0][1]
         
+    def __max(self, values: list[list[int]]) -> list[list[int]] | list[int]:
+        values = [tuple(_) for _ in values]
+        r: list = [0, []]
+        for v in set(values):
+            c: int = values.count(v)
+            print("C", c > r[0])
+            r[1] = [v] if c > r[0] else r[1] + [v] if c == r[0] else r[1]
+            r[0] = c if c > r[0] else r[0]
+        return r[1]
 
 
 

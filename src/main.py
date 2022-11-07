@@ -38,7 +38,7 @@ def load_menu():
 player1 = Player("❌", "Alvaritow", "red")
 player2 = Player("❌", "Fanico", "green")
 
-test = BoardGame(4,4, Bot("❌", "FCUKER2", "blue"), Bot("⭕", "FCUKER", "red"), game_lang="SPANISH") 
+test = BoardGame(3,3, Bot("❌", "FCUKER2", "blue"), Bot("⭕", "FCUKER", "red"), game_lang="SPANISH") 
 
 test._clear_caches()
 test.init_game()
