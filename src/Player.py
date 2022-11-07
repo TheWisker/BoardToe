@@ -101,8 +101,8 @@ class Player(object):
     @property #PROBABLY USELESS METHOD
     def betoken(self) -> int:
         "Return the token of the enemy as a number (0 for 0, 1 for X) ``(property)``"
-        return 1 if self.btoken else 0
-
+        return 0 if self.btoken else 1
+    
     @property
     def cache_keys(self) -> list:
         "Return a list with the cache keys``(property)``"
@@ -195,7 +195,6 @@ class Player(object):
         if key is not None: 
             yield from self.cache[key]
         yield from self.cache.items()
-
 
 if __name__ == "__main__":
     player1 = Player("⭕", "Alvaritow", "red")

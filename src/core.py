@@ -62,7 +62,6 @@ def rotate_matrix(matrix: list[list[int]], rts: int = 1, cw: bool = True) -> lis
 
 def rotate_index(inx: list[int, int], depth: int, cw: bool = False) -> list[int, int]:
     """
-    ONLY ACCEPTS SQUARE MATRIXES FOR NOW
     Parameters:
         index: The index as [x, y]
         matrix_depth: The matrix length, 
@@ -74,8 +73,6 @@ def rotate_index(inx: list[int, int], depth: int, cw: bool = False) -> list[int,
     r[1] = r[0]
     r[0] = depth-1-inx[1]
     return r if not cw else [r[1], r[0]]
-
-print(rotate_index([0,0], 3))
 
 def reverse_matrix(matrix: list[list], h: bool = True) -> list[list[int]]:
     """
@@ -154,6 +151,17 @@ def dgn_check(matrix: list[list[int]], n: int, rt: bool = False) -> tuple[int, l
             if v == -1:
                 r.append(reverse_index([k, k], len(matrix)) if rt else [k, k])
     return (dgn.count(-1), r) if r else None
+
+models: dict[str, str] = {
+    0: [
+        [0, 1, -1],
+        [0, 1, -1],
+        [-1, -1, -1]
+    ],
+}
+
+print(win_check(models[0], 0))
+print(win_check(models[0], 1))
 
 """
 def transform2matrix(table: list[list], reps: list[tuple] = [("❌", 1), ("⭕", 0), ("➖", -1)], reverse_method: bool = False) -> list:

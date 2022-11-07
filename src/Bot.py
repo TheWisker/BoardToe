@@ -57,16 +57,28 @@ class Bot(Player):
             "best_timing": None,
             "worst_timing": None,
             "predicted_moves": [] #? Solo el bot
-        }    
+        }   
 
-    def turn(self, matrix: list[list[int]], lang: str) -> list[float | tuple[str, str]]:
+    def __max(self, values: list[list[int]]) -> list[list[int]] | list[int]:
+        values = [tuple(_) for _ in values]
+        r: list = [0, []]
+        for v in set(values):
+            c: int = values.count(v)
+            print("C", c > r[0])
+            r[1] = [v] if c > r[0] else r[1] + [v] if c == r[0] else r[1]
+            r[0] = c if c > r[0] else r[0]
+        return r[1]
+
+
+
+    def turn(self, matrix: list[list[int]], lang: str) -> list[float | tuple[int]]:
         t = datetime.now()
-        moves: list[list[int, int]] | None = self.filter_moves(core.win_check(matrix, self.betoken), core.win_check(matrix, self.btoken))
+        moves: list[list[int]] | None = self.filter_moves(core.win_check(matrix, self.betoken), core.win_check(matrix, self.btoken))
         t = (datetime.now()-t).microseconds
         if moves:
-            moves = [max(set([tuple(m) for m in moves]), default = None, key = [tuple(m) for m in moves].count)]
+            moves = self.__max(moves)
         else:
-            input("EMAPATE")
+            input("EMPATE")
 
         x = moves[randint(0 , len(moves)-1)]
         print(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}Placed a token on {_Fore.LIGHTCYAN_EX}{(x[0]+1, x[1]+1)}{_Fore.LIGHTWHITE_EX} -> {_Fore.LIGHTYELLOW_EX}{t}μs{_Fore.RESET}")
@@ -78,6 +90,8 @@ class Bot(Player):
 
     def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]]) -> list[list[int]] | None:
         r: list = []
+        print(pmoves)
+        print(bmoves)
         for moves in [pmoves, bmoves]:
             moves = [v for v in moves if v]
             if moves:
@@ -89,6 +103,10 @@ class Bot(Player):
                 r.append(rr)
         return None if not r else r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
         
+
+
+
+
     """
     Razonamiento logico del botico:
 
