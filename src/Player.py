@@ -66,7 +66,7 @@ class Player(object):
         elif not isinstance(token, str):
             raise TypeError(f"@token param must be a string, not {token!r} of type {type(token).__name__}")
         elif not token in TOKENS:
-            raise TypeError(f"@token param is a invalid token. Valid token: '⭕' or '❌'")
+            raise TypeError(f"@token param is a invalid token. Valid tokens: '⭕' or '❌'")
         elif not color in self.__fmts:
             raise TypeError(f"@color param must be a valid color. Valid colors: {self.__fmts.keys()}")
         
@@ -75,7 +75,7 @@ class Player(object):
         self._color:   str   = self.__fmts[color]
         self.cache:  dict | MutableMapping = self._init_cache()
 
-        self.__custom_doc__ = custom_doc if custom_doc is not None and isinstance(custom_doc, str) else None
+        self.__custom_doc__ = custom_doc if custom_doc and isinstance(custom_doc, str) else None
 
     @property
     def name(self) -> str:
@@ -90,9 +90,19 @@ class Player(object):
         "Return the token of the player in a read-only view ``(property)``"
         return self._token
     @property
-    def btoken(self) -> str:
+    def btoken(self) -> int:
         "Return the token as a number (0 for 0, 1 for X) ``(property)``"
         return 1 if self._token == XTOKEN else 0
+
+    @property #PROBABLY USELESS METHOD
+    def etoken(self) -> str:
+        "Return the token of the enemy player in a read-only view ``(property)``"
+        return OTOKEN if self.token == XTOKEN else XTOKEN
+    @property #PROBABLY USELESS METHOD
+    def betoken(self) -> int:
+        "Return the token of the enemy as a number (0 for 0, 1 for X) ``(property)``"
+        return 1 if self.btoken else 0
+
     @property
     def cache_keys(self) -> list:
         "Return a list with the cache keys``(property)``"
@@ -114,7 +124,7 @@ class Player(object):
         "Reload the player cache, makes a new cache."
         self.cache = self._init_cache()
 
-    def _init_cache(self) -> dict[str,]:
+    def _init_cache(self) -> dict[str]:
         """
         Initialize the player cache with an static dictionary.
         - NOTE: You may want to override this method to get a different cache implementation

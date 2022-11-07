@@ -124,10 +124,11 @@ class BoardGame:
     def _pprint(self, table) -> None:
         "Prints the table in a pretty way (without colons and token-colored)"
 
-        self.board = core.transform2matrix(self.board, reverse_method=True) #? la transformamos a caracteres (esta en numeros)
+        self.board = core.replace_matrix([self.board], reverse=True) #? la transformamos a caracteres (esta en numeros)
+        core.matrix_view(self.board)
         columns, lines = get_terminal_size().columns, get_terminal_size().lines
         print("\n")     # white line to stylize
-        for i, column in enumerate(table):
+        for i, column in enumerate(self.board):
             print(multiple_replace("{} {}{}".format(" "*(columns//2-self.rows//2), i+1, column), 
                     (
                         ("'", ""), 
@@ -140,8 +141,9 @@ class BoardGame:
                 )
             )
         print("\n")     # white line to stylize
-        self.board = core.transform2matrix(self.board) #? la transformamos a numeros de nuevo
-
+        
+        self.board = core.replace_matrix([self.board]) #? la transformamos a numeros de nuevo
+        core.matrix_view(self.board)
 
     def show_stats(self) -> str | dict[str,]:
         print(self.stats)
@@ -154,8 +156,7 @@ class BoardGame:
         "Fuction to manage the turns"
 
         if self.actual_turn.is_bot():
-            turn_time, postuple = self.actual_turn.turn(self.board, self.actual_turn.btoken, self.game_lang)   
-            # el bot trabaja con numeros. Devolvemos el token binario (propiedad btoken)
+            turn_time, postuple = self.actual_turn.turn(self.board, self.game_lang)   
         else:
             turn_time, postuple = self.actual_turn.turn(self.game_lang)
 
@@ -185,7 +186,6 @@ class BoardGame:
         if table[posx][posy] != -1:
             #? la posicion ya esta cogida, evitamos que tenga que comprobar de que tipo es.
             print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 2).format(pos)}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
-            input("Error 3")
             posx, posy = self.handle_turn()
             return self.draw_board(table, (posx, posy), player)
             
@@ -198,7 +198,7 @@ class BoardGame:
 
         table[posx][posy] = player.btoken
 
-        #core.pretty_view(table)
+
 
         #? Guarda el movimiento del jugador en su cache. SOLO LAS COORDENADAS y el TIEMPO
         player.addmov(pos, self.turn_time)   
@@ -314,7 +314,7 @@ class BoardGame:
 
         self._clear_caches()     #* vacia la cache para iniciar una nueva partida, aunque ya se haya limpiado antes.  
 
-        self.board: list[list]          = core.transform2matrix(self._make_board())
+        self.board: list[list]          = core.replace_matrix([self._make_board()])
         self._playing: bool             = True
         self.actual_turn: Player        = choice(self._party_cache["players"])
 
@@ -325,8 +325,7 @@ class BoardGame:
 
                 self._pprint(self.board)
                 posx, posy = self.handle_turn()
-                print(posx, posy)
-                #core.pretty_view(self.board)
+
                 self.draw_board(self.board, (posx, posy), self.actual_turn)
                 
                 if self.checkWin():
@@ -355,7 +354,7 @@ class BoardGame:
         self._party_cache["party"]["total_time"] = self.partycounter
         self._game_cache.append(self._party_cache)
         self._playing = False
-        print(str(self.player1.cache) + '\n' + str(self.player2.cache))
+        #print(str(self.player1.cache) + '\n' + str(self.player2.cache))
 
         self._clear_caches()
 

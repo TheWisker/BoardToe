@@ -1,33 +1,83 @@
-from random import randint
+"""Main bot module"""
+#BoardToe imports
 from Player import Player
 import core as core
+#__init__ imports
+from constants import * 
+from typing import MutableMapping
+from pybeaut import Col as _Col
+#Misc imports
+from random import randint 
 from datetime import datetime
-
+from colorama import Fore as _Fore
 
 class Bot(Player):
     """
-    Class intantiated on game start as a player, 
-    accepts a parameter the bot player number, and the enemy player number, 
-    each turn the get_move function should be called to get the move that this bot plays.
+    Class instantiated on game start as a player,
+    each turn the turn() function should be called to get the move that this bot wants to make.
     """
+    __fmts: dict = _Col.static_cols_mapping
 
-    def __init__(self, token):
-        self._token = token
-        self._name = "CPU"
-        self._color = None
-        self.cache: dict = self._init_cache()
-        self.__custom_doc__ =  None
+    def __init__(
+        self, 
+        token: str,
+        name: str = "CPU",
+        color: str | _Col = _Col.white,
+        custom_doc: str = None
+    ):
+        if not isinstance(name, str):
+            raise TypeError(f"@name param must be a string, not {name!r} of type {type(name).__name__}")
+        elif not isinstance(token, str):
+            raise TypeError(f"@token param must be a string, not {token!r} of type {type(token).__name__}")
+        elif not token in TOKENS:
+            raise TypeError(f"@token param is a invalid token. Valid tokens: '⭕' or '❌'")
+        elif not color in self.__fmts:
+            raise TypeError(f"@color param must be a valid color. Valid colors: {self.__fmts.keys()}")
+
+        self._token: str = token
+        self._name: str = name     #* default 'CPU'
+        self._color: str = self.__fmts[color]
+        self.cache: dict | MutableMapping = self._init_cache()
+        self.__custom_doc__ = custom_doc if custom_doc and isinstance(custom_doc, str) else None
+
+    def is_bot(self) -> bool:
+        return True
+
+    def _init_cache(self) -> dict[str]:
+        """
+        Initialize the player cache with an static dictionary.
+        - NOTE: You may want to override this method to get a different cache implementation
+        """
+        return {
+            "name": self._name,
+            "token": self._token.strip(),
+            "color": self._color,
+            "movements": [],    #? Aqui solo se guarda la posicion del movimiento.
+            "timings": [],
+            "best_timing": None,
+            "worst_timing": None,
+            "predicted_moves": [] #? Solo el bot
+        }    
+
+    def turn(self, matrix: list[list[int]], lang: str) -> list[float | tuple[str, str]]:
+        t = datetime.now()
+        moves: list[list[int, int]] | None = self.filter_moves(core.win_check(matrix, self.betoken), core.win_check(matrix, self.btoken))
+        t = (datetime.now()-t).microseconds
+        if moves:
+            moves = [max(set([tuple(m) for m in moves]), default = None, key = [tuple(m) for m in moves].count)]
+        else:
+            input("EMAPATE")
+
+        x = moves[randint(0 , len(moves)-1)]
+        print(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}Placed a token on {_Fore.LIGHTCYAN_EX}{(x[0]+1, x[1]+1)}{_Fore.LIGHTWHITE_EX} -> {_Fore.LIGHTYELLOW_EX}{t}μs{_Fore.RESET}")
+        print("X", len(moves))
+
+        #BOT PRIORICES FUCKING PLAYER THAN HELPIN HIMSELF SOMETIMES, MAKE IT RANDOM EXCEPT ENEMY WIN
+        return [t, (x[0]+1, x[1]+1)]
 
 
-    def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]]) -> list[list[int]]:
+    def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]]) -> list[list[int]] | None:
         r: list = []
-
-        if not pmoves:
-            print("Player l")
-        elif not bmoves:
-            print("Bot l")
-
-
         for moves in [pmoves, bmoves]:
             moves = [v for v in moves if v]
             if moves:
@@ -37,87 +87,8 @@ class Bot(Player):
                         rr[1] = [_ for _ in v[1]] if rr[0] > v[0] else [_ for _ in rr[1]] + [_ for _ in v[1]] if rr[0] == v[0] else rr[1]
                         rr[0] = v[0] if rr[0] > v[0] else rr[0]
                 r.append(rr)
-
-        if r:
-            return r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
-        else:
-            input("EMPATE")
-
-    """
-    Traceback (most recent call last):
-    File "/home/kopi/GitHub/BoardToe/src/main.py", line 44, in <module>
-        test.init_game()
-    File "/home/kopi/GitHub/BoardToe/src/constructor.py", line 327, in init_game
-        posx, posy = self.handle_turn()
-    File "/home/kopi/GitHub/BoardToe/src/constructor.py", line 157, in handle_turn
-        turn_time, postuple = self.actual_turn.turn(self.board, self.actual_turn.btoken, self.game_lang)   
-    File "/home/kopi/GitHub/BoardToe/src/Bot.py", line 51, in turn
-        moves: list[list[int, int]] = self.filter_moves(core.adjacent_check(matrix, 0 if player else 1), core.adjacent_check(matrix, player))
-    File "/home/kopi/GitHub/BoardToe/src/Bot.py", line 43, in filter_moves
-        return r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
-    IndexError: list index out of range
-    """
-    def is_bot(self) -> bool:
-        return True
-
-    #! IMPORTANTE: 0 es False y 1 es True (comprobado)
-    def turn(self, matrix: list[list[int]], player: int, lang: str):
-        self.logic_time = datetime.now()
-        moves: list[list[int, int]] = self.filter_moves(core.adjacent_check(matrix, 0 if player else 1), core.adjacent_check(matrix, player))
-        self.logic_time = round((datetime.now()-self.logic_time).total_seconds(), 2)
-        print(player, 0 if player else 1)
-        print("X",core.adjacent_check(matrix, player))
-        print("Y",core.adjacent_check(matrix, 0 if player else 1))
-        print("Z",moves)
-        moves = [max(set([tuple(m) for m in moves]), key = [tuple(m) for m in moves].count)]
-        print("A",moves)
-        [(3, [[0, 0], [0, 1], [0, 2]]), (3, [[1, 0], [1, 1], [1, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (3, [[2, 1], [1, 1], [0, 1]]), (3, [[2, 2], [1, 2], [0, 2]]), (3, [[0, 0], [1, 1], [2, 2]]), (3, [[0, 2], [1, 1], [2, 0]])]
-        [(3, [[0, 0], [0, 1], [0, 2]]), (3, [[1, 0], [1, 1], [1, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (3, [[2, 1], [1, 1], [0, 1]]), (3, [[2, 2], [1, 2], [0, 2]]), (3, [[0, 0], [1, 1], [2, 2]]), (3, [[0, 2], [1, 1], [2, 0]])]
-        [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2], [2, 0], [1, 0], [0, 0], [2, 1], [1, 1], [0, 1], [2, 2], [1, 2], [0, 2], [0, 0], [1, 1], [2, 2], [0, 2], [1, 1], [2, 0]]
-        (1, 1)
-
-        [(3, [[0, 0], [0, 1], [0, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (1, [[0, 1]]), (2, [[0, 0], [2, 2]]), None]
-
-        [(3, [[0, 0], [0, 1], [0, 2]]), (1, [[2, 2]]), (3, [[2, 2], [1, 2], [0, 2]]), None, None]
-        [[1, 0]]
-        [(1, 0)]
-
-        [(3, [[0, 0], [0, 1], [0, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (3, [[2, 2], [1, 2], [0, 2]]), None, None]
-        [(3, [[0, 0], [0, 1], [0, 2]]), (2, [[1, 0], [1, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 0], [1, 0], [0, 0]]), (2, [[2, 1], [0, 1]]), (3, [[2, 2], [1, 2], [0, 2]]), (2, [[0, 0], [2, 2]]), (2, [[0, 2], [2, 0]])]
-        [[1, 0], [1, 2], [2, 1], [0, 1], [0, 0], [2, 2], [0, 2], [2, 0]]
-        [(0, 1)]
-
-
-        [(2, [[2, 0], [2, 1]]), None, None, None]
-        [(1, [[0, 1]]), (1, [[1, 0]]), None, (1, [[2, 0]])]
-        [[0, 1], [1, 0], [2, 0]]
-        [(0, 1)]
-
-        [(3, [[2, 0], [2, 1], [2, 2]]), (3, [[2, 2], [1, 2], [0, 2]]), None, None]
-        [(2, [[1, 0], [1, 2]]), (3, [[2, 0], [2, 1], [2, 2]]), (2, [[2, 0], [1, 0]]), (3, [[2, 2], [1, 2], [0, 2]]), (1, [[2, 2]]), (2, [[0, 2], [2, 0]])]
-        [[2, 2]]
-        [(2, 2)]
-
-
-        #BOT PRIORICES FUCKING PLAYER THAN HELPIN HIMSELF SOMETIMES
-
-
-        x = moves[randint(0 , len(moves)-1)]
-        return [self.logic_time, (x[0]+1, x[1]+1)]
-        # super().take_turn() to access to the base class method
-
-    
-
-
-    def _get_cases(board: list[list[int]], player: int) -> list[tuple[int, int]]:
-        results: bool | list[tuple[int, tuple[int, int]]] = core.check_matrix(board)
-        cases: list[tuple[int, int]] = []
-        if results is not bool:
-            for case in results:
-                if case[0] == player:
-                    cases.append(case[1]) 
-        return cases
-
+        return None if not r else r[0][1] if len(r) == 1 else r[1][1] if r[1][0] <= r[0][0] else r[0][1]
+        
     """
     Razonamiento logico del botico:
 
@@ -142,38 +113,3 @@ class Bot(Player):
 
     Posible implementacion del cache de botico, con improbable analisis de toma de decisiones (Muy complejo)
     """
-    
-
-    def get_move(self, board) -> tuple[int, int]:
-        bot_cases: list[tuple[int, int]] = self._get_cases(board, self.bot)
-        plr_cases: list[tuple[int, int]] = self._get_cases(board, self.plr)
-        if bot_cases:
-            return bot_cases[randint(0, len(bot_cases))]
-        elif plr_cases:
-            return plr_cases[randint(0, len(plr_cases))]
-        else:
-
-            ...
-
-models: dict[str, str] = {
-    6: [
-        [0, -1, 1],
-        [1, -1, 1],
-        [1, 1, 1],
-    ],
-    7: [
-        [5, 1, 0],
-        [0, 2, 1],
-        [1, 0, 2],
-    ],
-    8: [
-        [4, 1, 0],
-        [0, 2, 1],
-        [1, 0, 2],
-    ],
-    9: [
-        [4, 1, 0],
-        [0, 2, 1],
-        [1, 0, 2],
-    ]
-} 
