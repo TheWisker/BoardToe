@@ -7,51 +7,27 @@ For more detailed info about the class open a terminal al type 'python -i Player
 NOTE: This class can be subclassed,
 and may u want to do this to make other player object neither with special methods nor overriding any Player method.
 """
-from langs import Langs
+
 from utils import *
 from constants import *
 
 from datetime import datetime
 from typing import MutableMapping
 
-from colorama import Fore as _Fore
+
 from pybeaut import Col as _Col
+from colorama import Fore as _Fore
 
 
 __all__ = ["Player"]
 
 
-# static_cols_mapping: dict = {
-#         "red": red,
-#         "green": green, 
-#         "blue": blue, 
-#         "white": white,
-#         "black": black,
-#         "gray": gray,
-#         "yellow": yellow, 
-#         "purple": purple,
-#         "cyan": cyan,
-#         "orange": orange, 
-#         "pink": pink, 
-#         "turquoise": turquoise,
-#         "light_gray": light_gray,
-#         "dark_gray": dark_gray,
-#         "light_red": light_red,
-#         "light_green": light_green,
-#         "light_blue": light_blue,
-#         "dark_red": dark_red, 
-#         "dark_green": dark_green, 
-#         "dark_blue": dark_blue,
-#         "reset": reset,
-#     }
-
-
 class Player(object):
     """Main player class with cache implementation."""
     
-    # __slots__ = ("token", "name", "color", "cache")
+    # __slots__ = ("token", "name", "color", "cache")       #save memory (relevant)
     __fmts: dict = _Col.static_cols_mapping
-    AVAILABLE_COLORS    = [c for c in vars(Fore).keys() if c != "RESET" or not c.endswith("_EX")]
+    # AVAILABLE_COLORS    = [c for c in vars(_Fore).keys() if c != "RESET" or not c.endswith("_EX")]
 
     def __init__(
         self,
@@ -183,9 +159,9 @@ class Player(object):
         NOTE: ``You may want to overwrite this method in your subclass to adapt it to the needs of the subclass but it MUST ALWAYS RETURN THE SAME VALUE.``
         """
         t = datetime.now()
-        posx = input(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}{Langs.get_phrase(lang, 'game', 3).format('X')} -> {_Fore.RESET}") 
+        posx = input(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}{get_phrase(lang, 'game', 3).format('X')} -> {_Fore.RESET}") 
         #Coloca la coordenada {} (X o Y)
-        posy = input(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}{Langs.get_phrase(lang, 'game', 3).format('Y')} -> {_Fore.RESET}") 
+        posy = input(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}{get_phrase(lang, 'game', 3).format('Y')} -> {_Fore.RESET}") 
         t = round((datetime.now()-t).total_seconds(), 2)
 
         return [t, (posx, posy)]    #* [time, (posx, posy)]
