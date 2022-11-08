@@ -343,11 +343,12 @@ class BoardGame:
         self._party_cache["party"]["total_time"] = self.partycounter
         self._game_cache.append(self._party_cache)
         self._playing = False
-        #print(str(self.player1.cache) + '\n' + str(self.player2.cache))
+        print(str(self.player1.cache) + '\n' + str(self.player2.cache))
+        self.show_stats()
 
         self._clear_caches()
 
-        self.show_stats()
+        
 
 
 

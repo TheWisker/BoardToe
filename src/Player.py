@@ -14,7 +14,6 @@ from constants import *
 from datetime import datetime
 from typing import MutableMapping
 
-
 from pybeaut import Col as _Col
 from colorama import Fore as _Fore
 

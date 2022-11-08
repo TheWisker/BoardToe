@@ -74,7 +74,6 @@ class Bot(Player):
             print("EMPATE")
 
         x = moves[randint(0 , len(moves)-1)]
-        print(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}Placed a token on {_Fore.LIGHTCYAN_EX}{(x[0]+1, x[1]+1)}{_Fore.LIGHTWHITE_EX} -> {_Fore.LIGHTYELLOW_EX}{t}μs{_Fore.RESET}")
 
         #BOT PRIORICES FUCKING PLAYER THAN HELPIN HIMSELF SOMETIMES, MAKE IT RANDOM EXCEPT ENEMY WIN
         return [t, (x[0]+1, x[1]+1)]
@@ -102,6 +101,7 @@ class Bot(Player):
             r[1] = [v] if c > r[0] else r[1] + [v] if c == r[0] else r[1]
             r[0] = c if c > r[0] else r[0]
         return r[1]
+
 
     """
     Razonamiento logico del botico:
