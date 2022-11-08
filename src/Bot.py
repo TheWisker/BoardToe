@@ -1,15 +1,20 @@
 """Main bot module"""
+
 #BoardToe imports
 from Player import Player
-import core as core
+import core
+
 #__init__ imports
 from constants import * 
 from typing import MutableMapping
 from pybeaut import Col as _Col
+
 #Misc imports
 from random import randint 
 from datetime import datetime
 from colorama import Fore as _Fore
+
+
 
 class Bot(Player):
     """
@@ -63,8 +68,6 @@ class Bot(Player):
             "predicted_moves": [] #? Solo el bot
         }   
 
-    
-
     def turn(self, matrix: list[list[int]], lang: str) -> list[float | tuple[int]]:
         t = datetime.now()
         moves: list[list[int]] | None = self.__filter_moves(core.win_check(matrix, self.betoken), core.win_check(matrix, self.btoken), len(matrix))
@@ -72,7 +75,7 @@ class Bot(Player):
         if moves:
             moves = self.__max(moves)
         else:
-            input("EMPATE")
+            print("EMPATE")
 
         x = moves[randint(0 , len(moves)-1)]
         print(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}Placed a token on {_Fore.LIGHTCYAN_EX}{(x[0]+1, x[1]+1)}{_Fore.LIGHTWHITE_EX} -> {_Fore.LIGHTYELLOW_EX}{t}μs{_Fore.RESET}")
@@ -109,9 +112,6 @@ class Bot(Player):
             r[1] = [v] if c > r[0] else r[1] + [v] if c == r[0] else r[1]
             r[0] = c if c > r[0] else r[0]
         return r[1]
-
-
-
 
     """
     Razonamiento logico del botico:

@@ -1,14 +1,13 @@
 from utils import *
-from constants import *
-from langs import Langs
+from constants import OTOKEN, XTOKEN, TOKENS
+from logger import *
 from Player import Player
-import core as core
+import core
 
 from random import choice
 from datetime import datetime
 from collections import namedtuple
 from os import get_terminal_size
-# from threading import Thread
 
 from pybeaut import Col as _Col
 from colorama import Fore
@@ -44,8 +43,11 @@ class BoardGame:
         elif _rows != _columns or not 9 <= _rows * _columns <= 64:   #3x3 - 8x8 -> Min & max board range
             raise ValueError("The number of rows and columns must be equals or the table size is minor than 3x3 or mayor than 8x8 (Max table size of 8x8)")
         
-        elif not game_lang in Langs.langs_supported:
-            ...
+        elif not game_lang in AVAILABLE_LANGS:
+            raise TypeError(f"The selected language '{repr(game_lang)}' is not set yet!")
+        
+        elif not game_mode in {1, 2, 3}:
+            raise TypeError(f"Selected a incorrect game mode.")
         
 
         self.rows               = _rows
@@ -164,11 +166,11 @@ class BoardGame:
             posx, posy = int(postuple[0]), int(postuple[1])
 
         except:
-            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 0)}{Fore.RESET}") #Las coordenadas deben ser numeros!
+            print(f"\n{Fore.RED}[WARNING] -> {get_phrase(self.game_lang, 'errors', 0)}{Fore.RESET}") #Las coordenadas deben ser numeros!
             return self.handle_turn()
 
         if (not 1 <= posx <= self.rows) or (not 1 <= posy <= self.columns) or (not 1 <= posx <= self.rows and not 1 <= posy <= self.columns):
-            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 1).format(self.rows)}{Fore.RESET}") #Las coordenadas deben estar entre 1 y {}
+            print(f"\n{Fore.RED}[WARNING] -> {get_phrase(self.game_lang, 'errors', 1).format(self.rows)}{Fore.RESET}") #Las coordenadas deben estar entre 1 y {}
             return self.handle_turn()
 
         self.turn_time = turn_time     #? Si el turno es valido, entonces se guarda el tiempo, no antes.
@@ -185,20 +187,17 @@ class BoardGame:
   
         if table[posx][posy] != -1:
             #? la posicion ya esta cogida, evitamos que tenga que comprobar de que tipo es.
-            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 2).format(pos)}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
+            print(f"\n{Fore.RED}[WARNING] -> {get_phrase(self.game_lang, 'errors', 2).format(pos)}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
             posx, posy = self.handle_turn()
             return self.draw_board(table, (posx, posy), player)
             
         elif table[posx][posy] == player.btoken:
             #? la posicion esta ocupada por una ficha del mismo tipo
-            print(f"\n{Fore.RED}[WARNING] -> {Langs.get_phrase(self.game_lang, 'errors', 3)}{Fore.RESET}") #¡Ya has puesto una ficha en esta posicion!
+            print(f"\n{Fore.RED}[WARNING] -> {get_phrase(self.game_lang, 'errors', 3)}{Fore.RESET}") #¡Ya has puesto una ficha en esta posicion!
             posx, posy = self.handle_turn()
             return self.draw_board(table, (posx, posy), player)
 
-
         table[posx][posy] = player.btoken
-
-
 
         #? Guarda el movimiento del jugador en su cache. SOLO LAS COORDENADAS y el TIEMPO
         player.addmov(pos, self.turn_time)   
@@ -218,14 +217,6 @@ class BoardGame:
             - Diagonal en tablas par
             - Diagonal en tablas impar
         """
- 
-
-        # for subarrays in self.board:
-        #     if subarrays[0] == -1 or len(set(subarrays[0])) > 1:
-        #         continue
-        #     if all(elem == subarrays[0] for elem in subarrays):
-        #         self._save_win_to_cache("Horizontal")
-        #         return True
         
         for subarrays in self.board:
             if -1 in subarrays:
@@ -241,7 +232,6 @@ class BoardGame:
             if all(elem == self.board[0][i] for elem in checks):
                 self._save_win_to_cache("Vertical")
                 return True
-
 
         #! Metodo diagonal con impares
         if len(self.board) % 2 != 0: 
@@ -287,7 +277,6 @@ class BoardGame:
                     elif s == len(self.board)-2:  
                         self._save_win_to_cache("Upwards diagonal")
                         return True
-
         return False
             
 
@@ -331,7 +320,7 @@ class BoardGame:
                 if self.checkWin():
                     self.partycounter = round((datetime.now()-self.partycounter).total_seconds())
                     self._pprint(self.board)
-                    print(f"{Langs.get_phrase(self.game_lang, 'game', 2).format(self._party_cache['party']['win']['player_name'].upper())}") #¡{} ha ganado!
+                    print(f"{get_phrase(self.game_lang, 'game', 2).format(self._party_cache['party']['win']['player_name'].upper())}") #¡{} ha ganado!
                     break
 
                 elif self.checkDraw():
@@ -343,7 +332,7 @@ class BoardGame:
                 #cls()
 
         except KeyboardInterrupt:
-            print(f"\n{Fore.LIGHTYELLOW_EX}[GAME LOOP STOPED] -> {Langs.get_phrase(self.game_lang, 'runtime', 0)}{Fore.RESET}") #Se ha finalizado el juego forzosamente.
+            print(f"\n{Fore.LIGHTYELLOW_EX}[GAME LOOP STOPED] -> {get_phrase(self.game_lang, 'runtime', 0)}{Fore.RESET}") #Se ha finalizado el juego forzosamente.
             exit()
 
         self.player1.cache["best_timing"]     = min(self.player1.cache["timings"])

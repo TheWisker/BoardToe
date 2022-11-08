@@ -1,8 +1,7 @@
 from constants import *
-from langs import Langs
-from Bot import Bot
-from constructor import BoardGame, Fore
-from Player import Player, _Col
+from Bot import *
+from constructor import BoardGame
+from Player import Player
 
 try:
     from pybeaut import *
@@ -38,7 +37,7 @@ def load_menu():
 player1 = Player("❌", "Alvaritow", "red")
 player2 = Player("❌", "Fanico", "green")
 
-test = BoardGame(3,3, player1, Bot("⭕", "FCUKER", "red", "Imposible"), game_lang="SPANISH") 
+test = BoardGame(5,5, player1, Bot("⭕", "FCUKER", "red"), game_lang="SPANISH") 
 
 test._clear_caches()
 test.init_game()
