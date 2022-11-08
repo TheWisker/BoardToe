@@ -80,7 +80,6 @@ class Bot(Player):
         return [t, (x[0]+1, x[1]+1)]
 
     def filter_moves(self, pmoves: list[tuple[int, list[list[int]]]], bmoves: list[tuple[int, list[list[int]]]], d: int) -> list[list[int]] | None:
-        d = d + 1 if d == 3 else d
         r: list = []
         for moves in [pmoves, bmoves]:
             moves = [v for v in moves if v]
@@ -92,7 +91,7 @@ class Bot(Player):
                         rr[0] = v[0] if rr[0] > v[0] else rr[0]
                 r.append(rr)
 
-        return None if not r else r[0][1] if len(r) == 1 else r[1][1] if r[1][0] < r[0][0] or (r[0][0] >= d - 2 and randint(0,1)) else r[0][1]
+        return None if not r else r[0][1] if len(r) == 1 else r[1][1] if r[1][0] < r[0][0] or (r[0][0] >= d - (d // 2) and randint(0,1)) else r[0][1]
         
     def __max(self, values: list[list[int]]) -> list[list[int]] | list[int]:
         values = [tuple(_) for _ in values]
