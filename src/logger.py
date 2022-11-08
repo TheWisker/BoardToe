@@ -2,6 +2,7 @@ from pybeaut import Col as _Col
 from constants import EMOJI_MAPPING, OTOKEN, XTOKEN
 from _langs import *
 
+# __all__ = ["Logger", "get_phrase", "AVAILABLE_LANGS"]
 
 class Logger:
     ...

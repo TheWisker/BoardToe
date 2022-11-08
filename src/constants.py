@@ -21,29 +21,6 @@ EMOJI_MAPPING = {
     "magnifying glass": "🔍"
 }
 
-# static_cols_mapping: dict = {
-#         "red": red,
-#         "green": green, 
-#         "blue": blue, 
-#         "white": white,
-#         "black": black,
-#         "gray": gray,
-#         "yellow": yellow, 
-#         "purple": purple,
-#         "cyan": cyan,
-#         "orange": orange, 
-#         "pink": pink, 
-#         "turquoise": turquoise,
-#         "light_gray": light_gray,
-#         "dark_gray": dark_gray,
-#         "light_red": light_red,
-#         "light_green": light_green,
-#         "light_blue": light_blue,
-#         "dark_red": dark_red, 
-#         "dark_green": dark_green, 
-#         "dark_blue": dark_blue,
-#         "reset": reset,
-#}
 
 #TODO ///////////////////////////////////////       WELCOME TEXT BANNERS        ////////////////////////////////////////////////
 
