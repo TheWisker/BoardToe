@@ -70,6 +70,7 @@ class Bot(Player):
 
     def turn(self, matrix: list[list[int]], lang: str) -> list[float | tuple[int]]:
         t = datetime.now()
+        print(core.win_check(matrix, self.betoken))
         moves: list[list[int]] | None = self.__filter_moves(core.win_check(matrix, self.betoken), core.win_check(matrix, self.btoken), len(matrix))
         t = (datetime.now()-t).microseconds
         if moves:
