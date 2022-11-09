@@ -18,7 +18,8 @@ EMOJI_MAPPING = {
     "first_medal": "🥇",
     "cup": "🏆",
     "robot": "🤖",
-    "magnifying glass": "🔍"
+    "magnifying_glass": "🔍",
+    "question": "❔"
 }
 
 
@@ -43,3 +44,8 @@ WELCOME_TEXT2 = """
  ███████████  ░░░███████░   █████   █████ █████   █████ ██████████      █████    ░░░███████░   ██████████
 ░░░░░░░░░░░     ░░░░░░░    ░░░░░   ░░░░░ ░░░░░   ░░░░░ ░░░░░░░░░░      ░░░░░       ░░░░░░░    ░░░░░░░░░░                                                                                                       
 """
+
+SPLASH_TEXT = r"""Bienvenido a BoardToe, un juego inspirado en el famoso tres en raya
+pero con la ventaja de poder jugarlo en tableros desde 3x3 hasta 8x8. 
+Además dispone de varios modos de juego diferentes como Jugador vs Jugador, 
+Jugador vs Maquina o Maquina vs Maquina."""

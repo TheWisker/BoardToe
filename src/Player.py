@@ -10,13 +10,12 @@ and may u want to do this to make other player object neither with special metho
 
 from utils import *
 from constants import *
-from logger import AVAILABLE_LANGS, get_phrase
+from logger import *
 
 from datetime import datetime
 from typing import MutableMapping
 
 from pybeaut import Col as _Col
-from colorama import Fore as _Fore
 
 
 __all__ = ["Player"]
@@ -25,9 +24,7 @@ __all__ = ["Player"]
 class Player(object):
     """Main player class with cache implementation."""
     
-    # __slots__ = ("token", "name", "color", "cache")       #save memory (relevant)
     __fmts: dict = _Col.static_cols_mapping
-    # AVAILABLE_COLORS    = [c for c in vars(_Fore).keys() if c != "RESET" or not c.endswith("_EX")]
 
     def __init__(
         self,
@@ -69,15 +66,6 @@ class Player(object):
     def btoken(self) -> int:
         "Return the token as a number (0 for 0, 1 for X) ``(property)``"
         return 1 if self._token == XTOKEN else 0
-
-    @property #PROBABLY USELESS METHOD
-    def etoken(self) -> str:
-        "Return the token of the enemy player in a read-only view ``(property)``"
-        return OTOKEN if self.token == XTOKEN else XTOKEN
-    @property #PROBABLY USELESS METHOD
-    def betoken(self) -> int:
-        "Return the token of the enemy as a number (0 for 0, 1 for X) ``(property)``"
-        return 0 if self.btoken else 1
     
     @property
     def cache_keys(self) -> list:
@@ -137,12 +125,12 @@ class Player(object):
         __format_spec = __format_spec.lower()
 
         if __format_spec.startswith("tkn") and __format_spec[3:] in self.__fmts:
-            return self.__fmts[__format_spec[3:]]+self._token+_Fore.RESET
+            return self.__fmts[__format_spec[3:]]+self._token+_Col.reset
 
         if not __format_spec in self.__fmts:
             raise TypeError(f"That format is not valid. Valid formats: {self.__fmts.keys()}")
 
-        return self.__fmts[__format_spec]+self._name+_Fore.RESET
+        return self.__fmts[__format_spec]+self._name+_Col.reset
 
     def addmov(self, pos: tuple[int, int], time: float | int) -> None:
         "Add in a fast method one movement and it's time in the cache"
@@ -158,10 +146,11 @@ class Player(object):
 
         NOTE: ``You may want to overwrite this method in your subclass to adapt it to the needs of the subclass but it MUST ALWAYS RETURN THE SAME VALUE.``
         """
+        _logger = Logger(lang)
         t = datetime.now()
-        posx = input(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}{get_phrase(lang, 'game', 3).format('X')} -> {_Fore.RESET}") 
-        #Coloca la coordenada {} (X o Y)
-        posy = input(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}{get_phrase(lang, 'game', 3).format('Y')} -> {_Fore.RESET}") 
+        posx = input(_logger.question(3).format('X')) 
+        #Coloca la coordenada {} (X o Y) idx: 3
+        posy = input(_logger.question(3).format('Y')) 
         t = round((datetime.now()-t).total_seconds(), 2)
 
         return [t, (posx, posy)]    #* [time, (posx, posy)]
@@ -182,4 +171,3 @@ if __name__ == "__main__":
     print(player1.__dir__())
     print(player1.__sizeof__())
     print(player1.__doc__())
-    print(1 == True)

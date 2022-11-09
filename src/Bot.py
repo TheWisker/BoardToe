@@ -1,19 +1,16 @@
 """Main bot module"""
 
-#BoardToe imports
-from Player import Player
+
+from Player import Player, _Col
 import core
 
-#__init__ imports
-from constants import * 
+from constants import TOKENS
 from typing import MutableMapping
-from pybeaut import Col as _Col
 
-#Misc imports
-from random import randint 
+from random import randint, choice
 from datetime import datetime
-from colorama import Fore as _Fore
 
+botnames = ["EUSTAQUIO", "FANICOWBELL"]
 
 
 class Bot(Player):
@@ -26,7 +23,7 @@ class Bot(Player):
     def __init__(
         self, 
         token: str,
-        name: str = "CPU",
+        name: str = "CPU {}",
         color: str | _Col = _Col.white,
         difficulty: str = "Easy",
         custom_doc: str = None
@@ -39,11 +36,11 @@ class Bot(Player):
             raise TypeError(f"@token param is a invalid token. Valid tokens: '⭕' or '❌'")
         elif not color in self.__fmts:
             raise TypeError(f"@color param must be a valid color. Valid colors: {self.__fmts.keys()}")
-        elif not difficulty in ["Easy", "Normal", "Hard", "Imposible"]:
+        elif not difficulty.capitalize() in ["Easy", "Normal", "Hard", "Imposible"]:
             raise TypeError(f"@difficulty param must be a valid difficulty. Valid difficulties: 'Easy', 'Normal', 'Hard', 'Imposible'")
         
         self._token: str = token
-        self._name: str = name     #* default 'CPU'
+        self._name: str = name.format(choice(botnames))     #* default 'CPU'
         self._color: str = self.__fmts[color]
         self._difficulty: str = difficulty
         self.cache: dict | MutableMapping = self._init_cache()
@@ -68,18 +65,16 @@ class Bot(Player):
             "predicted_moves": [] #? Solo el bot
         }   
 
-    def turn(self, matrix: list[list[int]], lang: str) -> list[float | tuple[int]]:
+    def turn(self, matrix: list[list[int]]) -> list[float | tuple[int]]:
         t = datetime.now()
-        print(core.win_check(matrix, self.betoken))
-        moves: list[list[int]] | None = self.__filter_moves(core.win_check(matrix, self.betoken), core.win_check(matrix, self.btoken), len(matrix))
+        moves: list[list[int]] | None = self.__filter_moves(core.win_check(matrix, 0 if self.btoken else 1), core.win_check(matrix, self.btoken), len(matrix))
         t = (datetime.now()-t).microseconds
         if moves:
             moves = self.__max(moves)
         else:
-            print("EMPATE")
+            input("EMPATE")
 
         x = moves[randint(0 , len(moves)-1)]
-        print(f"{self.color}[{self.name}]{_Fore.RESET}: {_Fore.LIGHTWHITE_EX}Placed a token on {_Fore.LIGHTCYAN_EX}{(x[0]+1, x[1]+1)}{_Fore.LIGHTWHITE_EX} -> {_Fore.LIGHTYELLOW_EX}{t}μs{_Fore.RESET}")
 
         #BOT PRIORICES FUCKING PLAYER THAN HELPIN HIMSELF SOMETIMES, MAKE IT RANDOM EXCEPT ENEMY WIN
         return [t, (x[0]+1, x[1]+1)]
@@ -111,7 +106,6 @@ class Bot(Player):
         r: list = [0, []]
         for v in set(values):
             c: int = values.count(v)
-            print("C", c > r[0])
             r[1] = [v] if c > r[0] else r[1] + [v] if c == r[0] else r[1]
             r[0] = c if c > r[0] else r[0]
         return r[1]

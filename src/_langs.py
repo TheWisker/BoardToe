@@ -7,7 +7,7 @@ langs = {
             "errors": [
                 "¡Las coordenadas deben ser numeros!", #0
                 "Las coordenadas deben estar entre 1 y {}", #1
-                "¡Ops! Esa posicion ya esta ocupada. (Posicion: {})", #2
+                "¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})", #2
                 "¡Ya hay una ficha en esta posicion!" #3
             ],
             "runtime": [
@@ -15,9 +15,9 @@ langs = {
             ],
             "game": [
                 "¿En que idioma desea jugar?", #0
-                "Su idioma es el {}, ¿Correcto?",
+                "Su idioma es el {}, ¿Correcto?",   #1
                 "¡{} ha ganado el juego!", #2
-                "Coloca la coordenada {}", #3
+                "Coloca la coordenada {}:  ", #3
             ],
             "cache": []
         },
@@ -35,7 +35,7 @@ langs = {
                 "In which language do you wish to play?", 
                 "Your language is {}, correct?",
                 "{} has won the game!", 
-                "Place the coordinate {}"
+                "Place the coordinate {}:  "
             ],
             "cache": []
         },
@@ -53,7 +53,7 @@ langs = {
                 "In welcher Sprache möchten Sie spielen?", 
                 "Ihre Sprache ist {}, richtig?",
                 "{} hat das Spiel gewonnen!", 
-                "Platziere die Koordinate {}"
+                "Platziere die Koordinate {}:  "
             ],
             "cache": []
         },
@@ -71,7 +71,7 @@ langs = {
                 "In quale lingua desideri giocare?", 
                 "La tua lingua è {}, giusto?",
                 "{} ha vinto la partita!", 
-                "Posiziona la coordinata {}"
+                "Posiziona la coordinata {}:  "
             ],
             "cache": []
         },
@@ -89,7 +89,7 @@ langs = {
                 "На каком языке вы хотите играть?", 
                 "Ваш язык - {}, верно?",
                 "{} выиграл игру!", 
-                "Поместите координату {}"
+                "Поместите координату {}:  "
             ],
             "cache": []
         },
@@ -107,7 +107,7 @@ langs = {
                 "Dans quelle langue voulez-vous jouer ?", 
                 "Votre langue est {}, correct ?",
                 "{} a gagné la partie !", 
-                "Placez la coordonnée {}"
+                "Placez la coordonnée {}:  "
             ],
             "cache" : []
         },
@@ -125,7 +125,7 @@ langs = {
                 "Em que língua deseja jogar?", 
                 "A sua língua é {}, correcto?",
                 "{} ganhou o jogo!", 
-                "Coloque a coordenada {}", "Coloque a coordenada {}", "Coloque a coordenada {}"
+                "Coloque a coordenada {}:  "
             ],
             "cache": []
         },
@@ -143,7 +143,7 @@ langs = {
                 "どの言語でプレイしますか？", 
                 "あなたの言語は{}ですね?",
                 "{}がゲームに勝ちました！", 
-                "座標{}を配置します"
+                "座標{}を配置します:  "
             ],
             "cache": []
         },

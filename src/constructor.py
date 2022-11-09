@@ -1,6 +1,6 @@
 from utils import *
-from constants import OTOKEN, XTOKEN, EMPTOKEN, TOKENS
-from logger import get_phrase, AVAILABLE_LANGS
+from logger import *
+from constants import EMPTOKEN
 from Player import Player
 import core
 
@@ -10,10 +10,6 @@ from collections import namedtuple
 from os import get_terminal_size
 
 from pybeaut import Col as _Col
-from colorama import Fore
-
-
-
 
 
 
@@ -21,57 +17,50 @@ class BoardGame:
 
     _movtuple           = namedtuple("Movement", ["token", "player_name", "position", "moviment_time"])
     _ptycachetuple      = namedtuple("PartyCache", ["dictmap"])
-    
-    OCOLOR              = Fore.LIGHTWHITE_EX    #* static color for '0' if player does not give any color
-    XCOLOR              = Fore.LIGHTRED_EX      #* static color for 'X' if player does not give any color
 
     def __init__(
         self, 
-        _rows: int, 
-        _columns: int, 
+        size: tuple[int, int],
         _player1: Player,
         _player2: Player,
-        game_mode: int = 1,
         game_lang: str = "SPANISH",
         show_stats: bool = True
         
     ):
         
-        if not multiple_instcheck((_rows, _columns), int):
-            raise TypeError("Rows and columns must be a numerical parameters")
-        
-        elif _rows != _columns or not 9 <= _rows * _columns <= 64:   #3x3 - 8x8 -> Min & max board range
+        if not isinstance(size, (tuple, list)):
+            raise TypeError("@size must be a tuple or list containing w numerical values (rows and columns)")
+        elif not all(isinstance(e, int) for e in size) or len(size) != 2:
+            raise TypeError("The list have more than 2 values or rows and columns must be a numerical parameters")
+        elif size[0] != size[1] or not 9 <= size[0] * size[1] <= 64:   #3x3 - 8x8 -> Min & max board range
             raise ValueError("The number of rows and columns must be equals or the table size is minor than 3x3 or mayor than 8x8 (Max table size of 8x8)")
         
         elif not game_lang in AVAILABLE_LANGS:
             raise TypeError(f"The selected language '{repr(game_lang)}' is not set yet!")
-        
-        elif not game_mode in {1, 2, 3}:
-            raise TypeError(f"Selected a incorrect game mode.")
-        
 
-        self.rows               = _rows
-        self.columns            = _columns
+        self.rows = self.columns = size[0] or size[1]
         self.board              = None
 
         self.player1: Player    = _player1
         self.player2: Player    = _player2
+
 
         if self.player1.token == self.player2.token:
             raise ValueError(f"The players have the same token ({self.player1.token!r})!!")
         if self.player1.name == "Player":
             self.player1._name = "Player1"
         if self.player2.name == "Player":
-            self.player2._name = "Player2" if not self.player2.is_subclass() else self.player2.__class__.__name__
+            self.player2._name = "Player2"
 
         self.game_lang          = game_lang
-        self.game_mode          = game_mode 
+        self._logger: Logger    = Logger(game_lang)
         self._playing           = False
     
         self._party_cache       = self._make_party_cache()
         self._game_cache        = []
-        self.debuginfo = self.stats = self._ptycachetuple(self._party_cache)
 
+        if show_stats:
+            self._party_cache["Bot stats"] = []
 
     @property
     def playing(self):
@@ -127,7 +116,6 @@ class BoardGame:
         "Prints the table in a pretty way (without colons and token-colored)"
 
         self.board = core.replace_matrix([self.board], reverse=True) #? la transformamos a caracteres (esta en numeros)
-        core.matrix_view(self.board)
         columns, lines = get_terminal_size().columns, get_terminal_size().lines
         print("\n")     # white line to stylize
         for i, column in enumerate(self.board):
@@ -135,21 +123,18 @@ class BoardGame:
                     (
                         ("'", ""), 
                         (",", "  "), 
-                        ("[", f"{Fore.LIGHTBLUE_EX}║{Fore.RESET} "),
-                        ("]", f" {Fore.LIGHTBLUE_EX} ║{Fore.RESET}"),
-                        (OTOKEN, f"{self.OCOLOR}{OTOKEN}{Fore.RESET}"), 
-                        (XTOKEN, f"{self.XCOLOR}{XTOKEN}{Fore.RESET}")
+                        ("[", f"{_Col.cyan}║{_Col.reset} "),
+                        ("]", f" {_Col.cyan} ║{_Col.reset} "),
                     )
                 )
             )
         print("\n")     # white line to stylize
         
         self.board = core.replace_matrix([self.board]) #? la transformamos a numeros de nuevo
-        core.matrix_view(self.board)
 
     def show_stats(self) -> str | dict[str,]:
-        print(self.stats)
-
+        print(self._party_cache)
+        
 
     #! PUBLIC METHODS   ----------------------------------------------------------------
     
@@ -158,7 +143,7 @@ class BoardGame:
         "Fuction to manage the turns"
 
         if self.actual_turn.is_bot():
-            turn_time, postuple = self.actual_turn.turn(self.board, self.game_lang)   
+            turn_time, postuple = self.actual_turn.turn(self.board)   
         else:
             turn_time, postuple = self.actual_turn.turn(self.game_lang)
 
@@ -166,11 +151,11 @@ class BoardGame:
             posx, posy = int(postuple[0]), int(postuple[1])
 
         except:
-            print(f"\n{Fore.RED}[WARNING] -> {get_phrase(self.game_lang, 'errors', 0)}{Fore.RESET}") #Las coordenadas deben ser numeros!
+            print(self._logger.error(0)) #Las coordenadas deben ser numeros!
             return self.handle_turn()
 
         if (not 1 <= posx <= self.rows) or (not 1 <= posy <= self.columns) or (not 1 <= posx <= self.rows and not 1 <= posy <= self.columns):
-            print(f"\n{Fore.RED}[WARNING] -> {get_phrase(self.game_lang, 'errors', 1).format(self.rows)}{Fore.RESET}") #Las coordenadas deben estar entre 1 y {}
+            print(self._logger.error(1).format(self.rows)) #Las coordenadas deben estar entre 1 y {}
             return self.handle_turn()
 
         self.turn_time = turn_time     #? Si el turno es valido, entonces se guarda el tiempo, no antes.
@@ -187,13 +172,13 @@ class BoardGame:
   
         if table[posx][posy] != -1:
             #? la posicion ya esta cogida, evitamos que tenga que comprobar de que tipo es.
-            print(f"\n{Fore.RED}[WARNING] -> {get_phrase(self.game_lang, 'errors', 2).format(pos)}{Fore.RESET}") #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
+            print(self._logger.error(2).format(pos, table[posx][posy])) #¡Ops! Esa posicion ya esta ocupada. (Posicion: {}, token: {})
             posx, posy = self.handle_turn()
             return self.draw_board(table, (posx, posy), player)
             
         elif table[posx][posy] == player.btoken:
             #? la posicion esta ocupada por una ficha del mismo tipo
-            print(f"\n{Fore.RED}[WARNING] -> {get_phrase(self.game_lang, 'errors', 3)}{Fore.RESET}") #¡Ya has puesto una ficha en esta posicion!
+            print(self._logger.error(3)) #¡Ya has puesto una ficha en esta posicion!
             posx, posy = self.handle_turn()
             return self.draw_board(table, (posx, posy), player)
 
@@ -307,7 +292,6 @@ class BoardGame:
         self._playing: bool             = True
         self.actual_turn: Player        = choice(self._party_cache["players"])
 
-        print("Game started")
         try:
             while self._playing:
                 self.partycounter  = datetime.now()
@@ -320,7 +304,7 @@ class BoardGame:
                 if self.checkWin():
                     self.partycounter = round((datetime.now()-self.partycounter).total_seconds())
                     self._pprint(self.board)
-                    print(f"{get_phrase(self.game_lang, 'game', 2).format(self._party_cache['party']['win']['player_name'].upper())}") #¡{} ha ganado!
+                    print(f"{self._logger.victory(2).format(self._party_cache['party']['win']['player_name'].upper())}") #¡{} ha ganado!
                     break
 
                 elif self.checkDraw():
@@ -329,10 +313,10 @@ class BoardGame:
                     print(f"EMPATE!!")
                     break              
 
-                #cls()
+                cls()
 
         except KeyboardInterrupt:
-            print(f"\n{Fore.LIGHTYELLOW_EX}[GAME LOOP STOPED] -> {get_phrase(self.game_lang, 'runtime', 0)}{Fore.RESET}") #Se ha finalizado el juego forzosamente.
+            print(self._logger.runtime(0)) #Se ha finalizado el juego forzosamente.
             exit()
 
         self.player1.cache["best_timing"]     = min(self.player1.cache["timings"])
@@ -343,14 +327,11 @@ class BoardGame:
         self._party_cache["party"]["total_time"] = self.partycounter
         self._game_cache.append(self._party_cache)
         self._playing = False
-        print(str(self.player1.cache) + '\n' + str(self.player2.cache))
         self.show_stats()
 
         self._clear_caches()
 
         
-
-
 
 if __name__ == "__main__":
     ...

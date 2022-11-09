@@ -2,6 +2,9 @@
 from copy import deepcopy
 from constants import XTOKEN, OTOKEN, EMPTOKEN 
 
+
+
+
 def matrix_view(matrix: list[list[int]]) -> None:
     """Simple and fast method to get a 2D view of a 2D matrix,
     intended for debugging purposes only"""
@@ -10,6 +13,7 @@ def matrix_view(matrix: list[list[int]]) -> None:
         v += ' ' + str(m) + '\n'
     print("-"*len(matrix[0])*4+'\n', v, "-"*len(matrix[0])*4+'\n', sep="")
     return
+
 
 def replace_matrix(mtxs: list[list[list]], _search: list = [EMPTOKEN, OTOKEN, XTOKEN], _replace: list = [-1, 0, 1], reverse: bool = False) -> list[list[list]]:
     if reverse:
@@ -24,6 +28,7 @@ def replace_matrix(mtxs: list[list[list]], _search: list = [EMPTOKEN, OTOKEN, XT
             rr.append(rrr)
         r.append(rr)
     return r if len(r) > 1 else r[0]
+
 
 def rotate_matrix(matrix: list[list[int]], rts: int = 1, cw: bool = True) -> list[list[int]]:
     """
@@ -60,6 +65,7 @@ def rotate_matrix(matrix: list[list[int]], rts: int = 1, cw: bool = True) -> lis
         return rotate_matrix(reverse_matrix(r, cw), rts-1)
     return reverse_matrix(r, cw) #Here we interchange the columns vertically or horizonatlli depending on the direction of the rotation
 
+
 def rotate_index(inx: list[int, int], depth: int, cw: bool = False) -> list[int, int]:
     """
     Parameters:
@@ -73,6 +79,7 @@ def rotate_index(inx: list[int, int], depth: int, cw: bool = False) -> list[int,
     r[1] = r[0]
     r[0] = depth-1-inx[1]
     return r if not cw else [r[1], r[0]]
+
 
 def reverse_matrix(matrix: list[list], h: bool = True) -> list[list[int]]:
     """
@@ -97,6 +104,7 @@ def reverse_matrix(matrix: list[list], h: bool = True) -> list[list[int]]:
         r.append([matrix[k] for k in range(len(matrix)-1, -1, -1)])
     return r
 
+
 def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, int]:
     """
     (es): Invierte un indice de una matriz invertida horizontal o verticalmente para conseguir su equivalente en la matriz original.\n
@@ -118,17 +126,21 @@ def reverse_index(inx: list[int, int], dpth: int, h: bool = True) -> list[int, i
     r[1] = [x for x in range(dpth-1, -1, -1)][r[1]]
     return r if h else [r[1], r[0]]
 
+
 def win_check(matrix: list[list[int]], n: int) -> list[tuple[int, tuple[int]]]:
     "Function that returns a list with all the win positions for a player"
     return corner_check(matrix, n) + cross_check(matrix, n)
+
 
 def corner_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[int, int]]]]:
     "Function that returns a list with the horizontal and vertical win positions for a player"
     return row_check(matrix, n) + row_check(rotate_matrix(matrix), n, True)
 
+
 def cross_check(matrix: list[list[int]], n: int) -> list[list[tuple[int, list[int, int]]]]:
     "Function that returns a list with both diagonal win position for a player"
     return [dgn_check(matrix, n), dgn_check(reverse_matrix(matrix), n, True)]
+
 
 def row_check(matrix: list[list[int]], n: int, rt: bool = False) -> list[tuple[int, list[int]]] | None:
     "Function that returns a list with the horizontal win positions for a player"
@@ -142,6 +154,7 @@ def row_check(matrix: list[list[int]], n: int, rt: bool = False) -> list[tuple[i
             r.append((v.count(-1), rr))
     return r if r else [None]
 
+
 def dgn_check(matrix: list[list[int]], n: int, rt: bool = False) -> tuple[int, list[list[int, int]]] | None:
     "Function that returns a list with the first diagonal win position for a player"
     r: list = []
@@ -152,16 +165,19 @@ def dgn_check(matrix: list[list[int]], n: int, rt: bool = False) -> tuple[int, l
                 r.append(reverse_index([k, k], len(matrix)) if rt else [k, k])
     return (dgn.count(-1), r) if r else None
 
-models: dict[str, str] = {
-    0: [
-        [0, 1, -1],
-        [0, 1, -1],
-        [-1, -1, -1]
-    ],
-}
 
-print(win_check(models[0], 0))
-print(win_check(models[0], 1))
+
+
+
+if __name__ == '__main__':
+    models: dict[str, str] = {
+        0: [
+            [0, 1, -1],
+            [0, 1, -1],
+            [-1, -1, -1]
+        ],
+    }
+
 
 """
 def transform2matrix(table: list[list], reps: list[tuple] = [("❌", 1), ("⭕", 0), ("➖", -1)], reverse_method: bool = False) -> list:
