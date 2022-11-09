@@ -10,6 +10,7 @@ and may u want to do this to make other player object neither with special metho
 
 from utils import *
 from constants import *
+from logger import AVAILABLE_LANGS, get_phrase
 
 from datetime import datetime
 from typing import MutableMapping

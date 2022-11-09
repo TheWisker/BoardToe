@@ -1,6 +1,6 @@
 from utils import *
-from constants import OTOKEN, XTOKEN, TOKENS
-from logger import *
+from constants import OTOKEN, XTOKEN, EMPTOKEN, TOKENS
+from logger import get_phrase, AVAILABLE_LANGS
 from Player import Player
 import core
 
