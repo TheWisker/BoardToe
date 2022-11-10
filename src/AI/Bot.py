@@ -1,6 +1,9 @@
 """Main bot module"""
 
 
+import sys as _sys
+_sys.path.append("src")
+
 from Player import Player, _Col
 import core
 

@@ -1,5 +1,5 @@
 from constants import *
-from Bot import *
+from AI.Bot import *
 from time import sleep
 from constructor import BoardGame, _Col, Logger, get_terminal_size
 from Player import Player
