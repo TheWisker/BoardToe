@@ -68,7 +68,7 @@ reveal_anim(SPLASH_TEXT, _Col.cyan)
 # print(Box.DoubleCube(SPLASH_TEXT))
 display_options(["Human vs Human", "Human vs CPU", "CPU vs CPU"])
 
-lang = input(f"{Logger._get_phrase('game', 0)}:  ") #¿En que idioma desea jugar?
+lang = input(f"{Logger._get_phrase('game', 0)}:  ").upper() #¿En que idioma desea jugar?
 if input(f"{Logger._get_phrase('game', 1, lang).format(lang)}  ").lower() in ["yes", "y"]:
     pass
 
