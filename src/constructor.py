@@ -112,7 +112,7 @@ class BoardGame:
 
 
     #! RETOCAR LA FUNCION
-    def _pprint(self, table) -> None:
+    def _pprint(self) -> None:
         "Prints the table in a pretty way (without colons and token-colored)"
 
         self.board = core.replace_matrix([self.board], reverse=True) #? la transformamos a caracteres (esta en numeros)
@@ -296,7 +296,7 @@ class BoardGame:
             while self._playing:
                 self.partycounter  = datetime.now()
 
-                self._pprint(self.board)
+                self._pprint()
                 posx, posy = self.handle_turn()
 
                 self.draw_board(self.board, (posx, posy), self.actual_turn)

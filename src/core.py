@@ -3,8 +3,6 @@ from copy import deepcopy
 from constants import XTOKEN, OTOKEN, EMPTOKEN 
 
 
-
-
 def matrix_view(matrix: list[list[int]]) -> None:
     """Simple and fast method to get a 2D view of a 2D matrix,
     intended for debugging purposes only"""

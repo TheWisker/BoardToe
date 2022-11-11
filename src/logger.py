@@ -30,6 +30,7 @@ loggers: dict[str, list[str, str]] = {
     "runtime":      [_Col.blue, f"[{EM['megaphone']} ][{EM['exclamation']}] ", _Col.yellow],
     "game":     	[_Col.blue, f"[{EM['cup']} ][{EM['first_medal']}] ",       _Col.cyan],
     "victory":      [_Col.blue, f"[{EM['cup']} ][{EM['first_medal']}] ",       _Col.cyan],
+    "message":     [_Col.blue, f"[{EM['gearwheel']} ][{EM['loudspeaker']}] ",       _Col.white],
     "question":     [_Col.blue, f"[{EM['gearwheel']} ][{EM['question']}] ",       _Col.white],
 }
 
@@ -49,6 +50,11 @@ class Logger:
         if not lang in AVAILABLE_LANGS:
             raise KeyError(f"{lang!r} is not a valid language")
         return langs[lang.upper()][level.lower()][index]
+
+    @staticmethod
+    def phrase(p: str, logger: list[str]):
+        assert logger in loggers.values(), "That logger is not in loggers dictionary"
+        return f"\n{logger[0]+logger[1]}{logger[2]+p+_Col.reset}"
 
     #TODO: //////////////////////////////////   ADD METHODS  ////////////////////////////////
     
@@ -96,6 +102,9 @@ class Logger:
         "Se devuelve un mensaje logger con un mensaje de victoria"
         return self.logger("game", index, loggers["victory"])
     
+    def message(self, index: int):
+        return self.logger("game", index, loggers["message"])
+
     def runtime(self, index: int) -> str:
         "Se devuelve un mensaje logger con un mensaje relacionado con el flujo del juego"
         return self.logger("runtime", index, loggers["runtime"])

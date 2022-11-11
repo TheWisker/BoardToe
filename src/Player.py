@@ -137,7 +137,7 @@ class Player(object):
         self.cache["movements"].append(pos)
         self.cache["timings"].append(time)
     
-    def turn(self, lang: str = "ENGLISH") -> list[float | tuple[str, str]]:
+    def turn(self, lang: str) -> list[float | tuple[str, str]]:
         """
         Method to generate a turn to the player.
         
