@@ -66,7 +66,6 @@ class Player(object):
     def btoken(self) -> int:
         "Return the token as a number (0 for 0, 1 for X) ``(property)``"
         return 1 if self._token == XTOKEN else 0
-    
     @property
     def cache_keys(self) -> list:
         "Return a list with the cache keys``(property)``"
@@ -148,9 +147,9 @@ class Player(object):
         """
         _logger = Logger(lang)
         t = datetime.now()
-        posx = input(_logger.question(3).format('X')) 
+        posx = input(_logger.plquestion(3, self.name, self.color).format("X")) 
         #Coloca la coordenada {} (X o Y) idx: 3
-        posy = input(_logger.question(3).format('Y')) 
+        posy = input(_logger.plquestion(3, self.name, self.color).format("Y")) 
         t = round((datetime.now()-t).total_seconds(), 2)
 
         return [t, (posx, posy)]    #* [time, (posx, posy)]

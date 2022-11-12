@@ -32,7 +32,7 @@ loggers: dict[str, list[str, str]] = {
     "victory":      [_Col.blue, f"[{EM['cup']} ][{EM['first_medal']}] ",       _Col.cyan],
     "message":     [_Col.blue, f"[{EM['gearwheel']} ][{EM['loudspeaker']}] ",       _Col.white],
     "question":     [_Col.blue, f"[{EM['gearwheel']} ][{EM['question']}] ",       _Col.white],
-}
+    }
 
 
 class Logger:
@@ -98,6 +98,9 @@ class Logger:
     def question(self, index: int) -> str:
         return self.logger("game", index, loggers["question"])
     
+    def plquestion(self, index: int, pln: str, plc: _Col) -> str:
+        return f"\n{loggers['question'][0]+loggers['question'][1]}[{plc+pln+loggers['question'][0]}] {loggers['question'][2]+self._get_phrase('game', index, self.lang)}"
+
     def victory(self, index: int) -> str:
         "Se devuelve un mensaje logger con un mensaje de victoria"
         return self.logger("game", index, loggers["victory"])

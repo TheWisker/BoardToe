@@ -1,7 +1,7 @@
 from constants import *
 from utils import *
 from AI.Bot import *
-from constructor import BoardGame, Logger
+from constructor import BoardGame, Logger,AVAILABLE_LANGS
 from Player import Player
 
 from os import system, mkdir, get_terminal_size
@@ -33,14 +33,16 @@ TERMSIZE: list[int, int] = [get_terminal_size().columns, get_terminal_size().lin
 
 #& ************  ALIGNMENT FUNCS **************
 
-def _padding(size: int = 5, custom_icon: str = None) -> None:
-    "Genera X saltos de linea o espacios"
+def _padding(size: int = 5, X: bool = False, custom_icon: str = None) -> None:
+    "Genera espacios en la direccion dada (X, Y).\n``Predeteminadamente hace salto de linea (\\n)``"
     if custom_icon is not None:
-        print(custom_icon*size)
+            print(custom_icon*size)
+    if X:
+        print(" "*size)
     else:
         print("\n"*size)
 
-def _charging(repeats: int = 3, _interval: int = 0.1, delay: int = 0.25, color: _Col = None, hc: bool = True) -> None:
+def _charging(repeats: int = 3, interval: int = 0.1, delay: int = 0.25, color: _Col = None, hc: bool = True) -> None:
     """Crea una animacion de cargar.\n## Parametros.\n
     - @repeats: Las veces que repite la animacion de carga 
     - @interval: Tiempo de espera entre cada punto
@@ -54,10 +56,10 @@ def _charging(repeats: int = 3, _interval: int = 0.1, delay: int = 0.25, color: 
     def loop():
         for i in range(len(_)):
             print(_[:i+1], end= "\r")
-            sleep(_interval)
+            sleep(interval)
             if color is not None:
                 print(f"{color}{_[:i+1]}", end= "\r")
-                sleep(_interval)
+                sleep(interval)
     
     for r in range(repeats):
         loop()
@@ -67,43 +69,75 @@ def _charging(repeats: int = 3, _interval: int = 0.1, delay: int = 0.25, color: 
     if hc:
         Cursor.ShowCursor()
 
-#! Hacer para que se ajuste al tamaño de la terminal y haga un salto de linea automatico
-def reveal_anim(t: str, color: _Col = _Col.white, interval: int | float = 0.05, overlap: bool = False):
+def adjust_content(text: str, termlen: int = get_terminal_size().columns) -> list[str]:
+    fraction = round(len(text) / termlen)
+    if fraction < 2:        #? si el resultado de la division es 0.xx se redondea a 1
+        return [text]
+    _ = []
+    for i in range(fraction):
+        e = text[:termlen+1]
+        _.append(e)
+        text = text[termlen+1:]
+    return _
+
+def reveal_anim(t: str, color: _Col = None, interval: int | float = 0.05, overlap: bool = False, center: bool = False, fit: bool = False) -> None:
     """Genera una animacion de texto donde las letras se van revelando poco a poco. 
     ``Metodo recursivo.``
     """
+
+    if center:
+        if fit:
+            for i in adjust_content(t):
+                reveal_anim(i, color, interval, overlap)
+                return
+        for i in t.splitlines(True):
+            reveal_anim(Center.XCenter(i), color, interval, overlap)
+            return
+    elif fit:
+        for i in adjust_content(t):
+            reveal_anim(i, color, interval, overlap)
+            return
+        
+    
     for i in range(len(t)):
-        print(f"{color}{t[:i]}", end="\r")
+        if color is not None:
+            print(f"{color}{t[:i]}", end="\r")
+        else:
+            print(t[:i], end="\r")
         sleep(interval)
         if t[i] == "\n":
             if overlap:
-                reveal_anim(f"{color}{t[i+1:]}", color, interval)
+                reveal_anim(t[i+1:], color, interval)
                 break
-            print("\n")
-            reveal_anim(f"{color}{t[i+1:]}", color, interval)
+            print("\r")
+            reveal_anim(t[i+1:], color, interval)
             break
     print(_Col.reset)
         
 
 #& ************  TUI WRAPPERS **************
 
-def make_box():
-    ...
-
-def display_header(header: str, banner: str = None):
-    #Banner(header, banner)
-    ...
-
-
-def display_options(field_opts: list[list[str]], fields_names: list[str] = None, color: Colors = None) -> str:
-    r= []
-    for i,t in zip(range(len(field_opts)), field_opts):
-        r.append(f"[{i+1}] {t}\n")
+def _make_box(fields: list[str], color: _Col = _Col.white, btitle: str = None, enum: bool = False, simplecube: bool = False):
+ 
+    t = []
+    # if btitle is not None:
+    #     t.append(f"{btitle}\n")
     
-    e = Box.DoubleCube("".join(r))
-    print(Center.YCenter(Colorate.Horizontal(Col.cyan_to_blue, e)))
+    for i in range(len(fields)):
+        if enum:
+            t.append(f"[{i+1}] {fields[i]}")
+        else:
+            t.append(f"{fields[i]}")
+    
+    if simplecube:
+        if color:
+            return Colorate.Horizontal(color, Box.SimpleCube("\n".join(t)))
+        return Box.SimpleCube("".join(t))
+    
+    return Box.SimpleCube(f"{btitle}\n")+ "\n" + Box.DoubleCube("".join(t)) if not color else Colorate.Color(color, Box.DoubleCube("\n".join(t)))
 
-
+        
+# print(_make_box(["Human vs Human", "Human vs CPU", "CPU vs CPU"], btitle="Game modes", enum=True))
 
 
 def load_menu():
@@ -116,10 +150,9 @@ def load_menu():
     getpass(Colorate.Horizontal(_Col.blue_to_cyan, "Press Enter Key to continue. . ."))
     cls()
 
-    print(Center.Center(Colorate.Horizontal(_Col.blue_to_cyan, WELCOME_TEXT2)))
+    print(Colorate.Horizontal(_Col.blue_to_cyan, BANNER))
     _padding(3)
-    reveal_anim(Center.XCenter(SPLASH_TEXT), _Col.light_gray)
-    display_options(["Human vs Human", "Human vs CPU", "CPU vs CPU"])
+    reveal_anim(SPLASH_TEXT, fit= True)
     Cursor.ShowCursor()
 
 
@@ -134,14 +167,16 @@ if __name__ == "__main__":
 
     load_menu()
 
-    lang = input(f"{Logger._get_phrase('game', 0)}:  ").upper() #¿En que idioma desea jugar?
+    lang = input(Center.XCenter(f"{_Col.cyan}{Logger._get_phrase('game', 0)}:  ")).upper() #¿En que idioma desea jugar?
+    if lang not in AVAILABLE_LANGS:
+        ...
     if input(f"{Logger._get_phrase('game', 1, lang).format(lang)}  ").lower() in ["yes", "y"]:
         pass
 
     player1 = Player("❌", "Alvaritow", "red")
     player2 = Player("❌", "Fanico", "green")
 
-    test = BoardGame((4,4), player1, Bot("⭕", color="red", difficulty="easy"), game_lang=lang.upper()) 
+    test = BoardGame((5,5), player1, Bot("⭕", color="red", difficulty="easy"), game_lang=lang.upper()) 
 
     test.init_game()
 
